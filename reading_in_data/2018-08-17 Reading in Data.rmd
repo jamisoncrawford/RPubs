@@ -1,0 +1,505 @@
+---
+title: 'Intro to R: Directories & Reading Text Data'
+author: "Jamison Crawford, CNYCF"
+date: "August 3, 2018"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+---
+ 
+**Latest Versions & Updates:** This markdown document was built using the following versions of *R* and *RStudio*:
+ 
+* R v. 3.5.0
+* RStudio v. 1.1.453
+* Last Updated: 2018-08-25
+ 
+# Directories
+ 
+*"Directory"* is a fancy way to say folder, which may have subfolders, or "subdirectories".
+ 
+1. Like folders used every day, directories exist in a hierarchy
+2. The terms "parent" and "child" are often used to describe hierarchical relationship
+3. The topmost directory is referred to as the "root" directory
+ 
+Learn more: 
+ 
+* ["Directory (Computing)" (*Wikipedia*)](https://en.wikipedia.org/wiki/Directory_(computing))
+* ["Working Directories & Workspaces" (*RStudio*)](https://support.rstudio.com/hc/en-us/articles/200711843-Working-Directories-and-Workspaces)
+
+## The Working Directory
+
+*"Working Directory"* is the directory in which R, or other programs, execute tasks
+ 
+1. The default working directory in R is a "global default working directory"
+2. Typically, this is your *"home directory"*, which is referenced using the tilde, `~`
+3. If you choose to save your workspace in R, an `.RData` file is saved here
+4. You can change your default working directory in R Studio with:
+
+> Change Working Directory: "Tools" Menu (Alt + T) > "Global Options" (G)
+        
+**Determine Your Working Directory:** The `getwd()` function will print your current working directory to the console:
+
+```{r}
+getwd()
+```
+
+**Determine Directory Contents:** You can print the contents of your working directory with functions `dir()` & `list.files()`. 
+ 
+These don't require additional arguments.
+
+```{r eval = FALSE}
+dir()
+```
+
+```{r}
+list.files()
+```
+ 
+**Specifying Files:** Since you're printing a vector of every file in the directory, you can reference individual files using **bracket notation**, `[ ]`:
+ 
+```{r}
+dir()[1]
+dir()[2]
+```
+
+**File Paths:** You can use these and similar file handling functions to view other files
+ 
+Importantly, however, this requires the **"file path"**.
+ 
+1. When you reference a file using its path, its typically shorter if in your working directory
+2. Paths in other directories tend to be longer and more explicit
+
+*Note:* This is important to remember: Changing working directories may mean the path you use to reference other files also changes!
+ 
+**Creating Directories:** Let's create directory `my_new_dir`, using `dir.create()`, but first we should check if it already exists with `dir.exists()`:
+
+```{r}
+dir.exists("./my_new_dir")
+```
+
+It happens to be there since I created it earlier. Here, we've looked for *any* subdirectory on your machine with the name `my_new_dir`. We can do this because the period, `.`, is a **"regular expression"** that means *any sequence of characters*.
+ 
+Like writing or reading in files, *this occurs in your working directory!*
+ 
+If the directory did not exist, we could create the directory, `my_new_dir`, and make it our working directory with `setwd()`.
+ 
+```{r, warning = FALSE}
+dir.create("./my_new_dir")
+setwd("./my_new_dir")
+```
+  
+Now, let's write a file to this new directory using the `iris` dataset:
+ 
+```{r eval = FALSE}
+data(iris)
+write.csv(x = iris, file = "iris.csv")
+```
+ 
+**Note:** Notice how we have to include the name of the file, `iris.csv`, written as part of the path, and with the proper extension, ".csv". Here, we're electing to write as a .csv (comma separated value), but you could write as a tab-separated (.tsv), Excel file (.xlsx), etc.
+ 
+We can use `dir()` to print the contents of the directory we've just created:
+ 
+```{r}
+dir()
+```
+ 
+**Seeking the Path:** Figuring out the path for a file or directory is much easier with an interactive browser to print the path to the console. Functions `file.choose()` and `choose.dir()` do just that for files and directories, respectively.
+ 
+Generally, you may use the resulting path, now printed in the console, as the argument to different file handling functions. *It may require some modification, however.*
+
+```{r eval = FALSE}
+file.choose()
+choose.dir()
+```
+ 
+**Changing Working Directories:** You can change your working directory with function `setwd()`.
+ 
+However, RStudio offers an easier, albeit manual way with:
+ 
+* Menu "Session" (Alt + S) > "Set Working Directory" > "Choose Directory..."
+* RStudio Hotkey: Ctrl + Shift + H
+ 
+**Renaming Files or Directories:** We can rename files or directories with `file.rename()`, passing old and new paths to arguments `from =` and `to =`.
+ 
+## Discussion
+ 
+There are many other file handling functions in R that are quite useful. Many of these functions' naming conventions are seen across other computer languages, as well. For example, if you use version control, e.g. Git Bash, you'll use similar methods and syntax!
+ 
+**Self-Exploration:** To experiment with more file-handling functions, simply type "file." or "dir." into the console and press "tab" for an autocomplete list of possible functions.
+ 
+**Proceed Cautiously:** Wait until you really have the hang of this, though, before using `file.remove()` (which deletes directories)!
+ 
+**Importance of Understanding Directories:** Why are working directories important? There are a few reasons.
+ 
+1. Keeping your directories and files organized (or sometimes simply finding them!)
+2. Automating directory detection and creation when running a script on different machines
+3. Automating downloading to created directories, especially useful for zipped files
+4. Understanding how referenced paths will change when changing your working directory
+5. Reading in multiple datasets in a fell swoop for faster processing tasks
+6. Ensuring best practices in reproducible research
+ 
+### An Example: Automated Unzipping
+ 
+**Overview:** In this example, we'll retrieve Samsung smartphone accelerometer and gyroscope data from the UC Irvine's Machine Learning Repository. You can read the documentation [here](http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones).
+ 
+**Create Directory**: This stores the file URL in object `url`, checks for the existence of the directory `samsung`, and creates it if undiscovered:
+ 
+```{r}
+url <- "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip"
+if(!file.exists("./samsung")){dir.create("./samsung")}
+```
+ 
+**Download & Unzip:** Using functions `download.file()` and `unzip()`, we download and list the first six zipped files of this somewhat large series of data using `head()`:
+ 
+```{r cache = TRUE}
+download.file(url, destfile = "./samsung/samsung_data.zip", method = "curl")
+unzip(zipfile = "./samsung/samsung_data.zip", exdir = "./samsung")
+head(unzip(zipfile = "./samsung/samsung_data.zip", list = TRUE)[["Name"]])
+```
+ 
+**Read in a Single Table:** Here, we assign the *path* to object `path` and read in the data using `read.table()`, which is the horkhorse base R function for reading in text files (".txt"). We then take a peek at the first 6 observations of the first 5 columns in the data using function `head()`:
+ 
+```{r}
+path <- "samsung/UCI HAR Dataset/test/Inertial Signals/body_acc_x_test.txt"
+inertial_signals <- read.table(path)
+head(inertial_signals[, 1:5])
+```
+
+**Make Something Fancy:** The data is pretty darned useless out of context, as it's the inertial X-Y-Z readings from gyroscope and accelerometer data measured over time, using a single measure and not demarcated by the activities the test subjects are performing. But that doesn't mean we can't make some fun visualization. Here, we use `as.matrix()` to ensure the table is a **matrix**, or tabular data of a single class (numeric, here). We then use function `heatmap()` to create both a heatmap, without ostensible patterns, and dendrograms for rows and columns.
+ 
+```{r cache = TRUE}
+heatmap(as.matrix(inertial_signals))
+```
+ 
+**In Sum:** As you can see, by working with directories in-console, we're able to automate some very cool processes.
+ 
+## Deleting Directories
+ 
+You can remove files with `file.remove()` and entire directories with `unlink()`. Here, we'll remove the directory `samsung` and its contents:
+ 
+```{r}
+unlink(c("./samsung", "UCI HAR Dataset"), recursive = TRUE)
+```
+ 
+# Reading in Text Data
+
+Before we do anything further, let's quickly download a dataset with several million data points in the subdirectory we'd created earlier. We'll pull data from the New York State Education Department (NYSED), which you may explore [here](https://data.nysed.gov/downloads.php).
+ 
+```{r cache = TRUE}
+url <- "https://data.nysed.gov/files/gradrate/16-17/gradrate_2017.zip"
+download.file(url = url, destfile = "./gradrate_2017.zip")
+unzip(zipfile = "./gradrate_2017.zip", exdir = "./grad_data")
+```
+ 
+Observe the `Import Dataset` button in the upper-right corner of the RStudio GUI (Graphical User Interface). There, you'll find the following options:
+ 
+* From Text (base)...
+* From Text (readr)...
+* From Excel...
+* From SPSS...
+* From SAS...
+* From Stata...
+ 
+**On Text Files:** The term "Text File" may sound misleading but, in terms of data, it's an extremely low-overhead and common method of storing data using only plain text characters (as opposed to more sophisticated storage, e.g an Excel Workbook). You can read more here: ["Text File" (*Wikipedia*)](https://en.wikipedia.org/wiki/Text_file). First, some quick notes:
+ 
+1. You may hear these referred to as a "flatfile", though this is uncommon
+2. You can think of these as storing data in a standard "Notepad" app on Windows OS
+3. In fact, it's safe to say that R scripts are more or less flat files, as well
+4. Take a look at the [Syracuse Poverty Index in "raw" format](https://raw.githubusercontent.com/jamisoncrawford/Syracuse-Poverty-Index/master/index_v2_redact.csv) for a good visual representation of "Text Files"
+5. Likely the most common text file would be *Comma Separated Values* (.csv), however, there is an R function for most of them
+6. To see all the extensions R can read in, simply type "read." and press "tab" in the R console
+ 
+**Using RStudio:** RStudio makes it quite easy to read in text files using an iteractive GUI to modify arguments and get the data read in properly. In fact, it's likely to choose the right function if you choose the right character separator, e.g. commas, semicolons, et al.
+
+## Base Reading Functions
+
+**Overview:** We could use the "base" option, in this case for a .csv file, which like all base functions is created by the *R Core* team.
+ 
+* "Base" R uses the built-in "utils" package, which is loaded by default when using R
+* The *R Core* team typically uses *Lower Leopard Case*, which uses periods (`.`) in function names (so they're easy to spot...)
+ 
+Function `read.csv()`, for example:
+ 
+```{r eval = FALSE}
+read.csv()
+```
+ 
+**Pro Tips:** Keep in mind the following for `read.csv()` and other "Base" R reading functions:
+ 
+1. The only formally required argument in read.csv() function is `file =`, which accepts the path and file name
+2. If the dataset uses the first row as the names of variables, argument `header =` should be **TRUE**
+3. The *greatest pitfall*, and *bane of many an analyst*, is the argument `stringsAsFactors =` (note the *Camel Case*)
+4. In `read.csv()` and other "Base R" text-reading functions, `stringsAsFactors =` is **TRUE** by default
+5. Generally, this is undesirable, unless all qualitative data in the set is *categorical*
+
+**Other Common "Base" Text-Reading Functions:** Chief among these are `read.delim()` for **Tab-Delimited Files** (.txt) and `read.table()` for more exotic files which require more specification when read in.
+ 
+```{r eval = FALSE}
+read.delim()
+read.table()
+```
+ 
+**The Workhorse:** Function `read.table()` is incredibly flexible, but as mentioned requires tremendous specification. It is *the workhorse* for reading in text data among "Base" R reading functions. How?
+ 
+* Functions `read.csv()` and `read.delim()` are actually **Wrapper Functions**
+* That is, under the hood, all "Base" R text reading functions use `read.table()`
+ 
+**Additional Arguments:** Noteworthy among arguments are:
+ 
+* `sep =` to indicate separating characters
+* `col.names =` to specify a vector of column names
+* `colClasses =` to specify the classes of variables
+ 
+You may see geographic region-specific functions that, e.g., use `.` instead of `,` for thousands separators, e.g. Latin America:
+ 
+```{r eval = FALSE}
+read.csv2()
+read.delim2()
+```
+ 
+**In Practice:** Let's use `read.csv()` to read in that graduation data from NYSED. First, we'll save the path as object `file_name`.
+ 
+```{r}
+file_name <- "./grad_data/GRAD_RATE_AND_OUTCOMES_2017.csv"
+grads <- read.csv(file = file_name)
+```
+
+**Note:** `read.csv()` reads many of these data in as **factors**, or categorical variables, by default. We can see these laid out with `str()`. What's more, note that we can use argument `vec.len =` for the length of, according to the documentation for `str()`, the "first few" elements of each vector. Normally, an unbridled `str()` will print as many elements as will fit in your *R* or *RStudio* console, but since this is published online, it's one way to ensure the length of **vectors** printed aren't unwieldy. 
+ 
+```{r}
+str(grads, vec.len = 1)
+```
+ 
+Lets set argument `stringsAsFactors =` to **FALSE**, then:
+ 
+```{r}
+grads <- read.csv(file = file_name, stringsAsFactors = FALSE)
+str(grads, vec.len = 1)
+```
+ 
+**Conclusions:** That's an improvement, but these data still need quite a bit of cleaning! As class **character**, variables which contain **strings**, or sequences of letters and numbers of class **character**, will be easier to manipulate. We'll cover **string manipulation** in later publications.
+ 
+### Pro Tip: Reading from the Clipboard
+ 
+**Overview:** Simply put, this technique uses base R reading functions such as `read.table()` and `read.csv()` to read in tabular data which you've highlighted and copied, whether from a raw text file or highlighted *MS Excel* cells. Syntax is precisely the same, however instead of specifying a file path or URL (explored below), the argument `file =` accepts the value `"clipboard"`.
+ 
+View [these raw text data](https://raw.githubusercontent.com/jamisoncrawford/Syracuse-Crime-Analysis/master/Data/GeocodeResults.csv) in your browser. These comma-separated values are output from the [US Census Geocoder](https://geocoding.geo.census.gov/) currently being processed in our [Syracuse Crime Analysis](https://github.com/jamisoncrawford/Syracuse-Crime-Analysis).
+ 
+**In Practice:** First, copy these raw data by highlighting the entire text ("Ctrl" + "A") and copying it to your clipboard ("Ctrl" + "C"). Then run the following code, using `read.csv()`. Note that the columns in these data are unnamed:
+ 
+```{r eval = FALSE}
+geocoded <- read.csv(file = "clipboard", header = TRUE)
+head(geocoded)
+```
+ 
+**Conclusions:** Currently, only base R reading functions (and functions in package "clipr") can read in data from the clipboard, but this is a nifty little technique. Credit to Jesse Lecy, my former Data-Driven Management professor, for showing me this technique very recently! (You can find more of Jesse's work on his [GitHub profile](https://github.com/lecy)). Note that if reading from copied cells in an *MS Excel* spreadsheet, those are tab-delimited, so `read.table()` is required, with argument `sep = "\t"` (and argument `header = TRUE` if applicable).
+ 
+## Package "readr" Functions
+ 
+**Overview:** We could use the "readr" package functions, created by Hadley Wickham and maintained by the *RStudio* team. Some notes:
+ 
+* The *RStudio* team typically uses *Lower Snake Case*, separating functions with underscores, `_`
+* In fact, most *Tidyverse* packages, among which "readr" is included, use this convention; it's often a mark of Hadley Wickham's work
+* Recall that the package "readr" must first be loaded with `library()`; it requires no installation in *RStudio*
+ 
+```{r}
+library(readr)
+```
+ 
+```{r eval = FALSE} 
+read_csv()
+read_tsv()
+```
+ 
+**Benefits of "readr":** Reading functions with the "readr" package improve upon the "Base" R functions in a number of ways:
+ 
+* Significantly faster than "Base" R functions
+* Consistent argument names, ordering, and case
+* Argument `stringsAsFactors =` is now set to **FALSE** by default 
+* Converts data frames to **Tibbles**, which are just more useful, informative, and organized **Data frames**
+* Uses *Short String Representation* for single characters in a single string to represent classes
+ 
+**Short String Representation**: In argument `col_types =`, you can make a single string, wrapped in quotes, to quickly and individually specify variable classes! Short string characters include:
+ 
+* `c` for character
+* `d` for double
+* `i` for integer
+* `l` for logical
+* `_` to exclude variable
+
+What does that look like? See the following expression for 7 variable classes:
+ 
+```{r eval = FALSE}
+read_csv(file = "my_file.csv", col_names = TRUE, col_types = c("ccdiici"))
+```
+ 
+**In Practice:** Let's read the NYSED graduation data in again, but this time we'll use `read_csv()` from package "readr":
+ 
+```{r message = FALSE}
+grads <- read_csv(file = file_name, col_names = TRUE, quoted_na = TRUE)
+```
+ 
+**Reading in Exotic Text:** Function `read_delim()` is the "readr" equivalent of "Base" R's`read.table()` and likewise handles more exotic formats.
+ 
+* Notably, argument `delim =` is now used, instead of `sep =`, to specify the seperator character, like commas, semicolons, etc.
+* Like their "Base R" counterparts, `read_csv()` and `read_tsv()` are wrapper functions of `read_delim()`, and use the latter under the hood
+ 
+```{r eval = FALSE}
+read_delim()
+```
+ 
+**Additional Arguments**: Other important arguments include:
+ 
+* `col_names =` to specify column names
+* `skip =` accepts a single value for the number of rows to skip when reading in data
+* `n_max =` also takes a single value for the maximum number of rows when reading in data
+ 
+**Caution:** If you don't specify `col_names =` when using argument `skip =`, you will lose your the variable names in your first row!
+ 
+## Reading in Web Data
+ 
+**Overview:** There's nothing particularly difficult, here. In fact, reading in web data may be more reliable, assuming the source website is stable, when creating reproducible research. If you host the data, for example, you know that any machine will read it properly!
+ 
+Instead of a file path, simply use the URL for the data, wrapped in quotes!
+ 
+**In Practice:** Let's read in some data on lead violations in Syracuse, hosted by DataCuse and provided by the Onondaga County Health Department (OCHD). To view further documentation, click [here](http://data.syrgov.net/datasets/lead-violations). 
+ 
+It's never a bad idea to keep your code clean, so we'll again save the URL as an object, `url`, before reading in the data with `read_csv()`.
+ 
+```{r}
+url <- "https://opendata.arcgis.com/datasets/1b9b15b39ede405aa74d2daf5ebf7eab_0.csv"
+lead <- read_csv(file = url)
+```
+ 
+**Note:** The **tibble** produced is much more informative and organized compared to standard data frames:
+ 
+```{r echo = FALSE, results = "hide", message = FALSE}
+if(!require(dplyr)){install.packages("dplyr")}; library(dplyr)
+```
+
+```{r}
+as.data.frame(head(lead[,1:5]))
+as_tibble(lead)
+```
+ 
+## Piping Reading Functions
+
+**Overview:** We can go even further with reading functions by using the "dplyr" package's "pipe" operator, `%>%`, which was originally deployed in package "magrittr" and adopted by Hadley Wickham. The following uses an **If-Else Statement** to detect if the package is installed. If not, it installs itself.
+
+```{r}
+if(!require(dplyr)){install.packages("dplyr")}
+library(dplyr)
+```
+
+**Piping** functions allows us to not only read in the text data, but manipulate it through a chain of functions in one fluid command:
+ 
+```{r message = FALSE}
+lead <- read_csv(file = url) %>%
+    select(property_address:property_zip, case_open_date, neighborhood) %>%
+    mutate(property_zip = gsub(x = lead$property_zip, pattern = '\"', replacement = ""),
+           case_open_date = as.Date(lead$case_open_date))
+
+head(lead)
+```
+
+**Conclusions:** We'll explore package "dplyr" functions in more detail at a later date, but they're wonderful for cleaning as you read!
+
+## Package "data.table" Functions
+
+**Overview:** An in-depth look at package "data.table" is outside the scope of any introductory session, but it's certainly worth taking a look at its reading function, `fread()`, particularly in that "data.table" is *built for speed*. Let's briefly look at this formidable package.
+ 
+* Authored by Matt Dowle & Arun Srinivasan
+* Principal use cases are data manipulation
+ 
+The "data.table" package's primary reading function, `fread()`, works similarly to base R's `read.table()`, with some nuances. Unlike package "readr", "data.table" is not built into the RStudio IDE.
+ 
+**Package Installation:** First, let's determine if the package is already installed using an "If-Then" statement, the negation of function `require()` with the `!` operator, and function `install.packages()`. Then we can load it with `library()`:
+ 
+```{r warning = FALSE, message = FALSE}
+if(!require(data.table)){install.packages("data.table")}
+library(data.table)
+```
+ 
+**Nuances:** Function `fread()` is extraordinarily powerful, and should be considered when reading large datasets into your workspace. It's also notably easier to use than `read.table()`, the base R workhorse for reading in data, but `fread()` avoids several of its pitfalls. Namely, `fread()` will:
+ 
+* Automatically identify column names, or create them if undetected
+* Automatically detect separator values, e.g. commas (`,`) and semicolons (`;`)
+* Execute with little specification of arguments, though highly customizable
+* Automatically infer variable classes
+ 
+Let's use the ["Snowplow Data March 14 2017"](http://data.syrgov.net/datasets/snowplow-data-march-14-2017) data from [DataCuse](http://data.syrgov.net/), which contains 65,411 observations and 11 variables, making up over 700,000 data points. It's a relatively small dataset in terms of data science, but among the largest data files hosted on Open Data portals in the region. First, we'll store the URL in an object, `url`, by using the assignment operator, `<-`. Then we'll use `fread()` with a single argument, `input =`, and store the results in object `snow`.
+ 
+```{r cache = TRUE}
+url <- "https://opendata.arcgis.com/datasets/0a970f46802046e481a965dbd8c3210b_0.csv"
+snow <- fread(input = url)
+```
+ 
+**Note:** Function `fread()` prints its blazingly fast performance as a *tour de force*. In this case, it's likely that so-called **elapsed time**, or time observable to the user, is attributable to internet bandwidth, while **user time**, or time spent by your CPU(s) to read in the data, is likely immeasurably small, as indicated by the printed performance.
+ 
+**Additional Arguments:** Although little specification is needed for `fread()`, two arguments are noteworthy:
+ 
+* `drop =` specifies a vector of variables to exclude, concatenated with `c()`
+* `select =` specifies a vector of variables to include, also concatenated with `c()`
+* `nrows =` specifies the maximum number of rows to read in, similar to `n_max =` in "readr" functions
+* `verbose =` indicates whether `fread()` should report additional information on summary decisions
+ 
+**A New Class:** Like package "dplyr", which coerces data frames to class **tibble** automatically with `tbl_df()`, package "data.table" coerces data frames to class **data.table** automatically with `data.table()`. We can observe this with `class()`:
+ 
+```{r}
+class(snow)
+```
+ 
+**Findings:** Interestingly, objects in R may be assigned multiple classes. Here, we can see that object `snow` is both class `data.table` and `data.frame`. In fact, just for fun, we can override the class of object `snow` with an class of our own making using `class()` and the assignment operator, `<-`:
+ 
+```{r}
+class(snow) <- "frozen water vapor"
+```
+ 
+Let's see how we did:
+ 
+```{r}
+class(snow)
+```
+ 
+*Awesome.* Note that overriding the class of an R object, including functions, does not break their functionality!
+ 
+**Unclassing:** While objects of class **data.table** usually perform as advertised, you may want to consider coercing them, for whatever reason, back to a data frame. There's no guarantee that `as.data.frame()` on object `snow` will override the **data.table** classification, so the following uses `unclass()` to return object `snow` to a nearly-raw format, as a **list**, which I strongly advise against printing to the console. We can then wrangle that **list** back to a data frame with `as.data.frame()`.
+ 
+```{r}
+snow <- unclass(snow)
+snow <- as.data.frame(snow)
+class(snow)
+```
+ 
+**On Object Types, Briefly:** It's critical to understand the class of an R object in order to manage our expectations of its behavior, which we can check, or reassign (as seen above), using `class()`. Note that *managing our expectations in terms of an R object's behavior is particularly important for programming*. 
+ 
+However, R objects also have a **type** and **mode**, the latter of which is not particularly important unless you plan on coding in S, the language on which base R was written. The former, **type**, is something you may wish to be familiar with in the somewhat distant future. We can determine the **type** of an R object with `typeof()`. Notably, unlike class, *an R object's type cannot be overridden* with reassignment (`<-`).
+
+**Conclusions:** Package "data.table" is extraordinarily powerful. Even the documentation is rather tongue-in-check in being aware of its own power. Consider reading the documentation for `fread()` below, either with function `help()` or the `?` operator:
+ 
+```{r eval = FALSE}
+?fread
+help(fread)
+```
+ 
+Compared to *Tidyverse* packages like "readr" for reading data, "dplyr" for manipulating them, or "tidyr" for transposing them, package "data.table" has conventions and syntax that require significant practice to master. Try sticking to `fread()` for now, but don't forget about this otherwise incredible package!
+ 
+# Applied Practice
+ 
+**Instructions:** The following describe new but simple parameters for reading in text data. You'll be asked to use a new function to determine whether you were successful. 
+ 
+Note that for the text reading functions introduced above, you can use `help()` or the `?` operator with the bare function name (i.e. no quotation marks or parentheses) to read its documentation within RStudio, as well as use `formalArgs()` and the bare function name to list all possible arguments the function may accept.
+ 
+1. **City Budget:** Here's a link to the [Fiscal Year 2018 Adopted Budget](https://opendata.arcgis.com/datasets/e7f154d4aafa4aa6b6f198beeae7552f_0.csv) for the City of Syracuse in comma-separated format. Using function `sum()`, what is the total amount budgeted in variable `Sum_Amount`? 
+    + Recall that you use the convention `dataset$variable` to reference the totality of a variable within a dataset.
+ 
+2. **Park Attendance:** Check out [New York State Park Attendance by Facility](https://data.ny.gov/api/views/8f3n-xj78/rows.csv?accessType=DOWNLOAD) for the total annual attendance of State Parks in New York, provided by the [Office of Parks, Recreation, and Historic Preservation](https://data.ny.gov/Recreation/State-Park-Annual-Attendance-Figures-by-Facility-B/8f3n-xj78). Read in only row 19 and save it as object `green_lakes_2003`. Then read in only row 3,078 and save it as object `green_lakes_2003`. What is the difference in total annual attendees between 2003 and 2016?
+    + Comma-separated format
+    + Make sure argument `col_names =` is **FALSE** for both expressions
+    + This can be tricky, so make sure "Green Lakes State Park" appears in both rows
+    + Using the convention `dataset$variable`, use the arithmetic operator, `-`, to subtract the values of the 5th variable
+ 
+3. **Reported Larceny:** View the budding Syracuse Crime Analysis report for [Total Larcenies Committed by Month and Census Tract](https://raw.githubusercontent.com/jamisoncrawford/Syracuse-Crime-Analysis/master/Data/crm_larceny_table.csv) in comma-separated format. Do not read in the first 568 rows, and read in no more than 585 rows. Use `mean()` and the conventions described in the above hints to find the average number of larcenies in census tracts where larceny was reported during 2017. For more on documentation, visit the [GitHub repository](https://github.com/jamisoncrawford/Syracuse-Crime-Analysis).
