@@ -1,0 +1,433 @@
+---
+title: 'Visualization with ggplot2: Part I'
+author: "Jamison R. Crawford, MPA"
+date: "April 12, 2019"
+output:
+  html_document:
+    number_sections: yes
+    toc: yes
+    toc_depth: 4
+    toc_float: yes
+  pdf_document:
+    toc: yes
+    toc_depth: '4'
+---
+
+<style>
+body {
+text-align: justify}
+</style>
+
+<br>
+
+# Review
+
+For an introduction to data visualization in R, see [Visualization in Base R](http://rpubs.com/JamisonCrawford/graphics).
+
+<br>
+
+# The Grammar of Graphics
+
+Before introducing package `ggplot2`, it's important to understand the theory on which it's built.
+
+<br>
+
+## Human Grammar
+
+**Consider human language.** Native speakers rarely understand grammatical rules, but they use them intuitively.
+
+For example, we may not know why the indefinite article is sometimes "a" and at other times "an". Observe:
+
+* "There's a snake in my boot."
+* "There's an elephant in the room."
+
+We may also intuit the definite article, "the", in the case of superlatives. Observe:
+
+* "Be better."
+* "Be *the* best."
+
+<br>
+
+**Every Grammatical Element is Significant.** We use *parts of speech* like comparatives, superlatives, prepositions, definite and indefinite articles, verbs, nouns, adjectives, adverbs, phrasal verbs, and all other variety of grammatical elemets to create novel sentences. Observe a classic example:
+
+> "The quick brown fox jumps over the lazy dog."
+
+Note that if we change a single word, we change the signficance of the sentence.
+
+> "The slow brown fox jumps over the lazy dog."
+
+By using an antonym for "quick", the sentence is even more absurd. Let's make two more changes.
+
+> "The slow brown fox runs over the ethereal dog."
+
+Now we have a fox that can presumably operate a motor vehicle, and we delve into metaphysics a bit.
+
+<br>
+
+**We intuit the grammar of visualization.** But we often don't know the "rules" - if there are any.
+
+* We know what looks good
+* We know what looks bad
+
+Like human sentences, machine visualization can be elegant and efficient in conveying meaning. 
+
+Or it can be a salad of visual elements that disrespects your audience's time.
+
+<br>
+
+## A Grammar of Graphics
+
+In 1999, Leland Wilkinson published [The Grammar of Graphics](https://www.springer.com/us/book/9780387245447) and a theoretical framework for such a grammar.
+
+<br>
+
+**Layers.** Graphics are comprised of distinct **layers** of grammatical elements.
+
+* **Layers** are like *parts of speech* (e.g. nouns, verbs, etc.)
+* Like complete sentences, there are essential layers to make complete graphical expressions
+* These essential layers include the:
+    * **Data Layer** or what data you use
+    * **Aesthetics Layer** or what variable you wish to graph
+    * **Gemoetry Layer** or the shape or form by which to graph them your variables
+    
+<br>
+
+**Typical Conversation in Grammatical Terms.** Note what layers are really being discussed:
+
+<br>
+
+**Data****:**
+
+> "Are you pulling occupations from O*NET or BLS? We only need SOC-level."
+
+<br>
+
+**Aesthetics:**
+
+> "Could you color code the data points by ethnicity?"
+
+<br>
+
+**Geometry:**
+
+> "I'm trying to emphasize the increase in cases of EBLL levels over time."
+
+<br>
+
+**Coordinates:** 
+
+> "Can we zoom in on just the household incomes that are less than $45,000?"
+
+<br>
+
+**Statistics:**
+
+> "Let's add one of those squiggly lines to make that trend really stand out."
+
+<br>
+
+**Facets:** 
+
+> "Can we show multiple graphs that are organized by country of origin?"
+
+<br>
+
+**Themes:**
+
+> "We can only use colors that are in the company logo. Wait, what is that?"
+
+> "My two weeks' notice."
+
+<br>
+
+**A Unified Framework.** Individually, each element is a building block. As a whole, the **Grammar of Graphics** provides a common language for visualization experts.
+
+<br>
+
+**Mapping** or **Aesthetic Mapping** is simply depicting a variable by using these elements.
+
+<br>
+
+# ggplot2
+
+Package `ggplot2` is a popular, flexible, and powerful visualization extension for R.
+
+* Authored by Hadley Wickham of *RStudio*
+* Built as a "wrapper library" around R package `grid`
+* A core [Tidyverse](https://www.tidyverse.org/) package that interfaces seamlessly within the Tidyverse ecosystem
+* Implements many best practices by default, like the color decodability research of [Cynthia Brewer](https://en.wikipedia.org/wiki/Cynthia_Brewer)
+* Works best with [Tidy Data](https://vita.had.co.nz/papers/tidy-data.pdf)
+
+Further resources:
+
+* The [Tidyverse Overview](https://ggplot2.tidyverse.org/) of `ggplot2`
+* The `ggplot2` [Vignette](https://www.rdocumentation.org/packages/ggplot2/versions/3.1.1)
+* The `ggplot2` [Cheat Sheet](https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf)
+* General tips for `ggplot2` from the [R Graph Gallery](https://www.r-graph-gallery.com/portfolio/ggplot2-package/)
+* [CRAN Documentation](https://cran.r-project.org/web/packages/ggplot2/index.html) for `ggplot2`
+* The `ggplot2` [Extensions Gallery](http://www.ggplot2-exts.org/gallery/)
+
+<br>
+
+## Installing & Loading
+
+Installing and loading `ggplot2` is easy.
+
+<br>
+
+Use function `install.packages()` to install `ggplot2`. 
+
+* Make sure to use quotes around `ggplot2`
+* You only have to install it once
+
+```{r eval = FALSE}
+install.packages("ggplot2") 
+```
+
+<br>
+
+Use function `library()` to load `ggplot2`.
+
+* You don't need quotes, but you can use them (both are shown)
+* You must load `ggplot2` every time you start a new session
+
+```{r}
+library(ggplot2)
+library("ggplot2")
+```
+
+<br>
+
+## Loading Practice Data
+
+We'll use the practice dataset, `diamonds`, which comes with the `ggplot2` package.
+
+* The go-to practice dataset for `ggplot2`
+* Contains ~54,000 observations, each a diamond
+* Variables include `color`,, `price`, `clarity`, etc.
+* Learn more by running `?diamonds` or `help(diamonds)`
+* Load the dataset with function `data()`
+
+```{r}
+data(diamonds)
+```
+
+<br>
+
+Some other functiosn for exploring the `diamonds` dataset include:
+
+```{r}
+str(diamonds)          # The structure of the data
+names(diamonds)        # Variables names, or use...
+colnames(diamonds)
+dim(diamonds)          # Tabular dimensions 
+```
+
+<br>
+
+## Functions & Additions
+
+Package `ggplot2` has an absurd number of functions, but if you grasp the theory and practice, you'll get it.
+
+Each function begins with a name corresponding to the **layers** identified above.
+
+* Function `ggplot()` corresponds to the **Data Layer**
+* Function `aes()` corresponds to the **Aesthetics Layer**
+* Functions beginning with `geom_` correspond to the **Geometry Layer**
+* Functions beginning with `theme_` correspond to the **Themes Layer**
+* Functions beginning with `facet_`correspond to the **Facets Layer**
+* Etc.
+
+<br>
+
+The **Addition Operator**, or `+`, connects all of these functions into a single visualization. 
+
+For example, I've saved a **grob**, or **Graphical Object** that contains a plot, to demonstrate.
+
+* You don't really need to know what a **grob** is, yet, so don't worry about that now
+* Observe the use of the **Addition Operator** to modify **grobs** by adding new functions
+
+```{r message=FALSE, echo=FALSE, warning=FALSE, cache=TRUE}
+my_grob <- ggplot(diamonds, aes(x = carat, y = price)) +
+  geom_point()
+```
+
+```{r cache=TRUE}
+my_grob
+```
+
+<br>
+
+Note that we can add, for example, a new them with a `theme_*()` function.
+
+* Here, the `*` represents anything that may follow `theme_`
+
+```{r cache=TRUE}
+my_grob +
+  theme_classic()
+```
+
+<br>
+
+Let's try a different premade theme - there are a ton!
+
+```{r cache=TRUE}
+my_grob +
+  theme_minimal()
+```
+
+```{r cache=TRUE}
+my_grob +
+  theme_light()
+```
+
+<br>
+
+**Package Extensions.** You can even add new themes with package `ggthemes`.
+
+* Make sure to install with `install.packages()` and load with `library()`
+
+```{r cache=TRUE, warning=FALSE, message=FALSE}
+library(ggthemes)
+my_grob +
+  theme_fivethirtyeight()
+```
+
+Pretty neat. *There's even a color scheme for each of Wes Anderson's movies.*
+
+We'll discuss extensions at a later session.
+
+<br>
+
+## Intializing a Plot
+
+The anatomy of a plot is simple. As mentioned, three **layers** are essential:
+
+* The **Data Layer** with function `ggplot()` and the name of the dataset
+* The **Aesthetics Layer** with function `aes()` and the variables to **map**
+* The **Geomtry Layer** with functions starting with `geom_` for the shape of the plot
+
+<br>
+
+You can chain all of these together with the **Addition Operator**.
+
+* Here, we map variables to the x-axis and y-axis using arguments `x =` and `y =` in `aes()`
+* Note that you do not need to reference the dataset again, once called in function `ggplot()`
+* What's more, you don't have to put variable names in quotes, like `carat` and `price`
+    * This is called a **Quoting Function**
+
+```{r cache = TRUE}
+ggplot(data = diamonds) +
+  aes(x = carat, y = price) +
+  geom_point()
+```
+
+<br>
+
+**The "Right" Way.** Although it's much easier and cleaner to keep these functions separate:
+
+* There is a preferred syntax that combines functions `ggplot()` and `aes()`
+* This isn't immediately useful but is paramount for advanced visualizations
+* Why? You can use different datasets in the same graphic!
+* If you're new to coding, do whatever is easier for now
+
+```{r cache=TRUE}
+ggplot(data = diamonds, aes(x = carat, 
+                            y = price)) +
+  geom_point()
+```
+
+<br>
+
+## Aesthetics v. Attributes
+
+The difference between **Attributes** and **Aesthetics** is extremely important but very simple.
+
+**Aesthetic Mappings** depict a variable from your data
+
+* That is, `x =`, `y =`, `color =`, `fill =`, `alpha =`, etc. *all represent data*
+* This helps with depicting multiple variables in a single graphic
+* **The location of aesthetics** belong in function `aes()`
+    * That is, the **Aesthetics Layer**
+
+<br>
+
+**Attributes** do not depict data - this is called **Non-Data Ink**
+
+* Almost the same arguments apply, like `color =` and `fill =`
+* This helps with decoding a visualization and facilitating understanding
+* **The location of attributes** belong in any functiosn starting with `geom_`
+    * That is, the **Geometry Layer**
+    
+<br>
+
+### Examples
+
+Let's check out the same plot with an extra **Aesthetic Mapping**. Here, we'll add a new variable, each diamond's quality of `cut`, and map it to `color =` in function `aes()`:
+
+```{r cache=TRUE}
+ggplot(data = diamonds, aes(x = carat, 
+                            y = price,
+                            color = cut)) +
+  geom_point()
+```
+
+We can already gain new insights by mapping the variable `cut`.
+
+**Question.** What can you tell about the relationship between `price` and `cut`?
+
+<br>
+
+Now, observe an example of an **Attribute** or **Non-Data Ink**. Because we're not depicting a new variable, we don't put these arguments in functon `aes()`. Instead, we put them in function `geom_point()`, and we can choose the **Attributes** that help us to interpret the plot. Specifically:
+
+* `alpha =` sets the transparency of data points; helpful because of heavy overlap
+* `color =` helps us discern transparent points from the default grey background of `ggplot2`
+* We can use `theme_light()` or other functions for a non-grey background, if needed
+
+```{r cache=TRUE}
+ggplot(data = diamonds, aes(x = carat, 
+                            y = price)) +
+  geom_point(alpha = 0.1,
+             color = "tomato") +
+  theme_light()
+```
+
+We haven't added any new data to the plot, but now we can more easily interpret it.
+
+**Question.** What insights are made more clear by the parsimonious use of **Non-Data Ink**?
+
+<br>
+
+# Practice
+
+I'm went over my hourage cap for session prep like three hours ago, and I have some rare birds to hunt in *Red Dead Redemption 2*, but this practice may still be useful.
+
+<br>
+
+**Instructions.** Using the same plot with which we've practiced, experiment with:
+
+* Different **Aesthetic Mappings** for each variable
+* Remember to put them inside function `aes()` because they are **Data Ink**
+* Run the following to get their names:
+
+```{r}
+names(diamonds)
+```
+
+<br>
+
+Also, try:
+
+* Different **Attributes** to make the plot more appealing and decodable
+* Remember to put them inside function `geom_point()` because they are **Non-Data Ink**
+
+<br>
+
+It's dangerous to go alone. Take this:
+
+* [Colors in R](http://www.stat.columbia.edu/~tzheng/files/Rcolor.pdf)
+* [Aesthetic Specifications](https://cran.r-project.org/web/packages/ggplot2/vignettes/ggplot2-specs.html), like `shape =`, `size =`, `alpha =`, etc.
+
+<br>
+
+Thanks for reading!

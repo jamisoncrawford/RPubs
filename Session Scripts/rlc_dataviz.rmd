@@ -1,0 +1,440 @@
+---
+title: 'Visualization in Base R'
+author: "Jamison R. Crawford, MPA"
+date: "March 13, 2019"
+output:
+  html_document:
+    number_sections: yes
+    toc: yes
+    toc_depth: 4
+    toc_float: yes
+  pdf_document:
+    toc: yes
+    toc_depth: '4'
+---
+
+```{r packages, echo=FALSE, message=FALSE, warning=FALSE, cache=TRUE}
+
+options(scipen = 999)
+
+if(!require(zoo)){install.packages("zoo")}
+if(!require(tidyr)){install.packages("tidyr")}
+if(!require(readr)){install.packages("readr")}
+if(!require(dplyr)){install.packages("dplyr")}
+if(!require(GGally)){install.packages("GGally")}
+if(!require(scales)){install.packages("scales")}
+if(!require(stringr)){install.packages("stringr")}
+if(!require(ggplot2)){install.packages("ggplot2")}
+if(!require(kableExtra)){install.packages("kableExtra")}
+
+library(zoo)
+library(tidyr)
+library(readr)
+library(dplyr)
+library(GGally)
+library(scales)
+library(stringr)
+library(ggplot2)
+library(kableExtra)
+
+rm(list = ls())
+
+```
+
+<br>
+
+# What is Data Visualization?
+
+<br>
+
+**Data Visualization** is:
+
+* "The representation of an object, situation, or set of information as a chart or other image" [- Oxford Dictionary](https://en.oxforddictionaries.com/definition/us/data_visualization)
+* "...the creation and study of the visual representation of data" [- Wikipedia](https://en.wikipedia.org/wiki/Data_visualization)
+
+<br>
+
+**Abbreviations****:** Both **"data vis"** and **"data viz"** are used as abbreviations for data visualization.
+
+<br>
+
+Observe this example, which visualizes public construction records for Lakeview Amphitheater in Syracuse, NY:
+
+<br>
+
+<center>
+
+```{r, cache=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
+url <- "https://raw.githubusercontent.com/jamisoncrawford/reis/master/Datasets/tblr_master.csv"
+lvhc <- read_csv(url) %>%
+  filter(!is.na(race))
+
+index <- which(lvhc$race == "Native")
+lvhc[index, "race"] <- "Indigenous"
+
+ggplot(lvhc, aes(x = factor(race, levels = rev(c("White",
+                                             "Indigenous",
+                                             "Hispanic",
+                                             "Black",
+                                             "Multiracial",
+                                             "Asian"))), y = gross)) +
+  geom_jitter(stat = "identity", width = 0.3, alpha = 0.4, color = "tomato") +
+  coord_flip() +
+  theme_minimal() +
+  labs(x = NULL,
+       y = "Gross (K)",
+       title = "An example of data visualization",
+       subtitle = "Lakeview Amphitheater: Gross construction worker payments by race",
+       caption = "Source: Onondaga County\nRecords disclosing race") +
+  scale_y_continuous(labels = c("$ 0", "1", "2", "3", "4 K")) +
+  theme(axis.title.x = element_text(vjust = -0.35,
+                                    color = "grey40"),
+        axis.text.y = element_text(color = "black"),
+        axis.text.x = element_text(color = "black"),
+        plot.caption = element_text(vjust = -0.25,
+                                    color = "grey60",
+                                    lineheight = 1.2),
+        plot.subtitle = element_text(color = "grey 40"))
+
+```
+
+</center>
+
+<br>
+
+**Questions****:** In observing the above scatter plot:
+
+* What do you like about it?
+* What do you dislike about it?
+* What idea does this image attempt to convey? 
+
+<br>
+
+# Visualization in R
+
+<br>
+
+**R** uses, or may use, both built-in and external **packages** (libraries) to produce graphics.
+
+The three most popular packages, from oldest to newest, are:
+
+* [graphics](https://www.rdocumentation.org/packages/graphics/versions/3.5.2), built into R for "base graphics"
+* [lattice](https://cran.r-project.org/web/packages/lattice/index.html), an external package for [small multiples](https://en.wikipedia.org/wiki/Small_multiple), which group and depict data in small charts on common scales
+* [ggplot2](https://cran.r-project.org/web/packages/ggplot2/index.html), a core [Tidyverse](https://www.tidyverse.org/) package based on Leland Wilkinson's "Grammar of Graphics" (1999) 
+
+<br>
+
+Honorable mention goes to package [grid](https://www.rdocumentation.org/packages/grid/versions/3.5.2), which powers a lot of base R `graphics` output behind the scenes.
+
+<br>
+
+# Base R "graphics"
+
+<br>
+
+Package `graphics` comes preinstalled and preloaded in your *R* or *RStudio* environment.
+
+* Base R visualizations are layered, i.e. an "Artist's Palette" approach
+* The first visualization activates R's graphics device
+* Subsequent commands layer over the initial viz
+* Errors require rerunning these commands
+
+<br>
+
+## Practice Data
+
+<br>
+
+**Let's import** the Lakeview Amphitheater data again and save them in object `lv`:
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE, cache=TRUE}
+library(readr)
+
+url <- "https://raw.githubusercontent.com/jamisoncrawford/reis/master/Datasets/tblr_master.csv"
+lv <- read_csv(url)
+
+index <- which(lv$project == "Lakeview")
+lv <- lv[index, 1:12]
+```
+
+You can find the documentation for these data in the [Lakeview](https://github.com/jamisoncrawford/lakeview) and [Hancock](https://github.com/jamisoncrawford/hancock) repositories.
+
+<br>
+
+**Explore the data** with `str()` and other exploratory functions:
+
+```{r, eval=FALSE}
+names(lv)
+dims(lv)
+summary(lv)
+```
+
+```{r}
+str(lv)
+```
+
+<br>
+
+## Functions
+
+<br>
+
+**Plotting Functions****:** Base R graphics have many functions. The following will initialize a plot:
+
+* `plot()` automatically detects/creates scatter plots, bar charts, etc.
+* `hist()` creates a histogram for a single variable
+* `boxplot()` creates a box and whisker plot
+* `barplot()` creates bar plots
+
+There are several other functions for intializing plots, but these are common.
+
+<br>
+
+**Annotating Functions****:** The functions and others will annotate an existing plot.
+
+* `loess()` adds a smoother to an existing scatter plot
+* `text()` adds text to an existing plot
+* `jitter()` adds random noise to points to break up overlap
+* `legend()` adds a legend to an existing plot
+
+<br>
+
+**Modifiable Parameters****:** Parameters go inside the `()` of a function, and there are many.
+
+* `main =` modifies title
+* `xlab =` modifies x-axis label
+* `ylab =` modifies y-axis label
+* `lwd =` modifies line width
+* `lty =` modifies line type
+* `col =` modifies color
+* `cex =` modifies size
+
+There are a ridiculous number of modifiable parameters. You can learn more by running `?par`.
+
+The curious learner should check out this [Base R Cheat Sheet](https://dcgerard.github.io/stat234/base_r_cheatsheet.html) by David Gerard (2017).
+
+<br>
+
+**Turn It Off****:** Since each annotating function adds a layer to an existing plot:
+
+* You can begin a new plot with `plot.new()`
+* You can turn off (and restart) your graphical device with `dev.off()`
+
+These are great go-to procedures for troubleshooting when visualizations subvert from expectations.
+
+<br>
+
+**Let's Plot****:** The following is a scatterplot of `hours` worked as a function of `gross` pay.
+
+* Here, we're setting `x =` and `y=` to dataset `lv` and variables `hours` and `gross` using `$`
+
+```{r}
+plot.new()
+plot(x = lv$hours, y = lv$gross)
+```
+
+<br>
+
+**Modifying an Initial Plot****:** You can adjust the parameters in the initial call to `plot()`.
+
+```{r}
+plot.new()
+plot(x = lv$hours, 
+     y = lv$gross,
+     main = "Lakeview: Weekly hours v. gross pay",
+     xlab = "Hours",
+     ylab = "Gross")
+```
+
+<br>
+
+**Experiment** with the above plot with new arguments. Try:
+
+* `pch =` adjusts point shape (e.g. `pch = 19`)
+* `col =` adjust color (e.g. `col = "tomato", try it)
+
+<br>
+
+## Mid-Introduction Practice
+
+<br>
+
+**Instructions****:** Use these data (`lv`) to create a histogram, function `hist()`, of the distribution of hours worked each pay period, variable `hours`. Refer to these data as `lv$hours` in arguments.
+
+The following arguments are separated by commas and must use `""`, e.g. `col = "skyblue"`
+
+Check out [Colors in R](http://www.stat.columbia.edu/~tzheng/files/Rcolor.pdf) for a sizeable selection of colors.
+
+* Set a title with argument `main =`
+* Set a color argument with `col =`
+* Set an x-axis label with `xlab =`
+* Set a y-axis label with `ylab =`
+* Set the size of the binwidths with `breaks =`
+* Store this in object: `my_hist` - the code is all set
+
+```{r eval=FALSE}
+my_hist <- hist()
+```
+
+<br>
+
+## Global Parameters
+
+<br>
+
+**Setting Global Parameters****:** Recall the earlier call to `?par` to view all base graphics arguments.
+
+* Function `par()` allows setting global parameters
+* In other words, they apply to plots until reset
+* Allows for unified and consistent visualizations
+* Reset by calling `par()` or `dev.off()`
+
+<br>
+
+For example, we can change the number of visualizations in one graphic with argument `mfrow =`:
+
+```{r eval=FALSE}
+par(mfrow = c(1, 2))
+```
+
+Here, `mfrow =` takes a pair of numbers in function `c()`, the first is for rows, the second, columns.
+
+<br>
+
+**Grid It****:** After calling `par()` with `mfrow = c(1, 2)`, you can call the following plot functions:
+
+```{r}
+par(mfrow = c(1, 2))
+
+plot(x = lv$hours, 
+     y = lv$gross,
+     main = "Weekly hours v. gross",
+     xlab = "Hours",
+     ylab = "Gross (USD)",
+     pch = 21,
+     col = "tomato")
+
+hist(x = lv$hours,
+     main = "Distribution of worker hours",
+     xlab = "Hours",
+     col = "skyblue")
+```
+
+<br>
+
+## Exporting Graphics
+
+<br>
+
+**Base exporting** functions include `png()`, `pdf()`, `jpeg()`, `tiff()`, `bmp()`, and others.
+
+* `filename =` takes a quoted value, including an extension, e.g. `"hours_distro.png"`
+* `height =` and `width = ` modify dimensions - important for tailoring, not stretching, graphics
+* `units =`, relating to height and width, is the units for size, e.g. `"in"` (inches) or `"px"` (pixels)
+* `family =` selects font family, affecting all text
+* `res =` adjusts resolution
+
+<br>
+
+## Verdict
+
+<br>
+
+**Weaknessess**:** Base R package `graphics` has shortcomings:
+
+* "Artist's Palette" is cool, and good script writing helps, but it may be inconvenient
+* Limited use of [small multiples](https://en.wikipedia.org/wiki/Small_multiple) with function `pairs()`
+* Inconsistent in syntax, with unintuituve arguments (e.g. `cex =`)
+* Limited in displaying multivariate data
+* Not terribly elegant
+
+<br>
+
+**Strengths****:** Base R package `graphics` has a few advantages:
+
+* "Quick and Dirty" exploratory visualizations to understand new data
+* Uses many arguments which help in understanding more advanced packages
+* Pretty good for statistics-related visualization
+
+<br>
+
+**In summary,** Base R `graphics` is rarely used when alternatives like package `ggplot2` are easier to learn and often more practical to implement. However, it has some pretty nifty statistical uses. Here's a few:
+
+**Heatmaps**
+
+```{r}
+data(volcano)
+heatmap(volcano)
+```
+
+**Model Summaries**
+
+```{r}
+my_lm <- lm(gross ~ hours, data = lv)
+par(mfrow = c(2, 2))
+plot(my_lm)
+```
+
+</center>
+
+<br>
+
+**Dendrograms**
+
+```{r, cache=TRUE}
+my_cluster <- hclust(dist(USArrests), "ave")
+plot(my_cluster)
+```
+
+<br>
+
+**Mosaic Plots or Confusion Matrices**
+
+```{r}
+mosaicplot(gross ~ hours, 
+           data = lv[1:20, ])
+```
+
+<br>
+
+**Univariate Diagnostics**
+
+
+
+<br>
+
+# Applied Practice
+
+<br>
+
+**Importing Data****:** Run the following code to import the worker records for the I-690.
+
+```{r warning=FALSE, message=FALSE}
+library(readr)
+
+url <- "https://raw.githubusercontent.com/jamisoncrawford/reis/master/Datasets/690_workforce_summary.csv"
+hw <- read_csv(url)[, 1:12]
+```
+
+ <br>
+
+**The Plots****:** Create four plots in a 2 by 2 grid. The calls to `par()` and `mfrow =` are in the code below. Create:
+
+1. A histogram of `hw$hours` with function `hist()`
+2. A histogram of `hw$gross` with function `hist()`
+3. A scatterplot of `hw$gross` and `hw$hours` with function `plot()`
+4. A boxplot (using function `plot()`) with `x = as.factor(hw$race)` and `y = hw$gross`
+
+<br>
+
+**The Annotations****:** Include the following arguments for each plot and supply thoughtful parameters:
+
+* `main =`
+* `xlab =` (optional)
+* `ylab =` (optional)
+* Set `frame.plot = FALSE`
+* Use `col =`, `cex =`, `size =`, and `pch =` at your discretion
+
+```{r evaluate=FALSE}
+par(mfrow = c(2, 2))
+```

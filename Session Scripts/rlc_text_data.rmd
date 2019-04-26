@@ -1,0 +1,980 @@
+---
+title: 'Intro to R: Text Data'
+author: "Jamison R. Crawford, MPA"
+date: "December 6, 2018"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 4
+    number_sections: true
+---
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+setwd("~/CNYCF/R Learning Community/2018-11-09")
+
+```
+
+**Latest Versions & Updates:** This markdown document was built using the following versions of *R* and *RStudio*:
+ 
+* R v. 3.5.1
+* RStudio v. 1.1.456
+* Document v. 1.1
+* Last Updated: 2018-12-06
+
+<br>
+
+# Introductory Review
+
+The following provides an overview of techniques we've learned, including links to the original session.
+
+<br>
+
+## Objects & Assignment
+
+**Objects** in R contain single values, multiple values (*vectors*), and tabular data (*data frames*). 
+ 
+**The Assignment Operator**, `<-`, names and stores one or more values, functions, or data structures.
+
+```{r}
+my_value <- 5                                            # Store a single value
+
+my_vector <- c(5, 10, 15)                                # Vectors: Concatenated values
+
+my_dataframe <- data.frame(x = c(1, 2, 3),
+                           y = c("a", "b", "c"),
+                           z = c(TRUE, TRUE, FALSE))     # Data Frames: Tabular structures
+```
+
+<br>
+
+**Print objects** by simply entering the object name or explicitly using the function `print()`.
+
+```{r}
+my_value             # Autoprints using only the object name
+```
+
+```{r}
+print(my_vector)     # Explicitly prints with function print() 
+```
+
+<br>
+
+**Built-In Objects** already exist in R, such as `letters`, all lowercase letters, or `mtcars`, a dataset on cars from 1972.
+
+```{r}
+letters
+head(mtcars)
+```
+
+**Original Session****:** [Intro to R: Operators](http://rpubs.com/JamisonCrawford/operators)
+
+<br>
+
+## Operators
+
+**Arithmetic Operators** in R are used for addition, subtraction, multiplication, division, operator preference, and exponentiation.
+
+**Class Numeric** data are required.
+
+```{r}
+(5^2 * 4) / 2
+```
+
+<br>
+
+**Relational Operators** in R are used in relational statements that compare one or a series of values, e.g. `<`, `>`, `==`, `!=`.
+
+**Class Logical** result from relational statements, i.e. `TRUE` or `FALSE`. 
+
+```{r}
+10 < c(8, 9, 11, 12)
+```
+
+<br>
+
+**Logical Operators** bind multiple relational statements.
+
+**OR**, i.e. `|`, requires at least one statement to be `TRUE`.
+
+```{r}
+5 > 1 | 10 < 5
+```
+
+**AND**, i.e. `&`, requires all statements to be `TRUE.
+
+```{r}
+5 > 1 & 10 < 5
+```
+
+**Original Session****:** [Intro to R: Operators](http://rpubs.com/JamisonCrawford/operators)
+
+<br>
+
+## Subsetting & Indexing
+
+**The Dollar Sign Operator**, i.e. `$`, subsets or extracts a specific variable from a dataset.
+
+```{r}
+mtcars$mpg          # Combine the dataset name and variable name to subset the variable
+```
+
+<br>
+
+**Indexing** a subset variable is done with brackets, `[` & `]`, and the number or numbers of the element(s) by position.
+
+```{r}
+mtcars$mpg[5]      # Combine the dataset, variable, and position to extract a specific value
+```
+
+<br>
+
+**Index by Row & Column Position** using the row number and column number in brackets, separated by a comma, `,`.
+
+```{r}
+mtcars[25, 1]
+```
+
+<br>
+
+**Index by Name** using the row name and column name in the same manner.
+
+```{r}
+mtcars["Pontiac Firebird", "mpg"]
+```
+
+<br>
+
+**Index Multiple Positions** by concatenating more than one position number using function `c()`.
+
+```{r}
+mtcars["Honda Civic", c(1, 2, 4, 6)]
+```
+
+<br>
+
+**Subset All Rows or All Columns** by leaving the position empty within the brackets.
+
+```{r}
+mtcars[1:5, ]        # Subset rows 1-5 and all columns
+mtcars[ c(1, 2)]     # Subset columns 1-2 and all rows
+```
+
+<br>
+
+**Filter with Relational Operators** by placing a relational statement in the row position, in brackets.
+
+```{r}
+mtcars[mtcars$mpg < 15, ]     # Subset only cars with less than 15 mpg
+```
+
+<br>
+
+**Assign Subset Data to New Objects** using the assignment operator, `<-`, an object name, and the subset data.
+
+```{r}
+gas_guzzlers <- mtcars[mtcars$mpg < 15, ]
+```
+
+<br>
+
+**Save Objects to Index Data** using the assignment operator, `<-` and one or more relational statements.
+
+```{r}
+index <- mtcars$cyl == 8 & mtcars$hp > 240     # Store logical values: TRUE or FALSE
+
+dream_cars <- mtcars[index, ]                  # Use the indexing object in the row position
+
+print(dream_cars)                              # Print results
+```
+
+**Original Session****:** [Intro to R: Subsets & Indices](http://rpubs.com/JamisonCrawford/subsets)
+
+<br>
+
+# On Classes
+
+**Classes** of both variables and single values dictate how R will recognize and work with them.
+
+<br>
+
+## Determining Class
+
+**Identify Class** by using the `class()` function and inputting either one or more values or an object.
+
+```{r}
+class(10L)                # Call class() on a single value; here, "L" indicates an integer
+class(c(TRUE, FALSE))     # Call class() on multiple values, e.g. "logical" values
+class(mtcars)             # Call class() on an object with stored data to determine structure
+class(mtcars$mpg)         # Call class() on a subset variable for the class of its values
+```
+
+<br>
+
+**Numeric** data include any quantitative data, including:
+
+* Class `numeric` in an all encompassing term for quantitative data
+* Class `integer`, or values comprised of whole numbers
+* Class `double`, or values with floating decimals
+
+<br>
+
+**Logical** data contain logical values, e.g. `TRUE` or `FALSE`.
+
+Under the hood, `logical` data are represented by 1 and 0.
+
+```{r}
+TRUE == 1
+FALSE == 0
+```
+
+<br>
+
+**Character** data contain uncategorized text, e.g. "Onondaga County".
+
+```{r}
+my_county <- "Onondaga County"
+class(my_county)
+```
+
+<br>
+
+**Factor** data represent categorical data where each category is a "level", e.g. gender, race, or census tract.
+
+```{r}
+cylinders <- factor(mtcars$cyl)        # Create factors using the factor() function
+class(cylinders)
+levels(cylinders)                      # Function levels() prints each category in a factor
+```
+
+<br>
+
+## Coercing Classes
+
+**Coercion** is the act of converting values and objects to new classes, usually with an `as.()` function.
+
+```{r}
+class(mtcars$mpg)                          # Print the class of variable "mpg"
+mtcars$mpg <- as.character(mtcars$mpg)     # Coerce the class from "numeric" to "character"
+class(mtcars$mpg)                          # Re-print the class to confirm changes
+```
+
+<br>
+
+**The Purpose of Coercion** is so R will treat your values in the manner you intend.
+
+**Function Overloading** is the quality in R which allows functions to behave differently depending on object class.
+
+```{r}
+class(mtcars$cyl)       # Determine class for variable "cyl", or number of cylinders
+summary(mtcars$cyl)     # Print descriptive statitistics for numeric data with summary()
+```
+
+```{r}
+mtcars$cyl <- as.character(mtcars$cyl)     # Coerce to class "character" with as.character()
+summary(mtcars$cyl)                        # Function summary() now prints the number of elements
+```
+
+```{r}
+mtcars$cyl <- as.factor(mtcars$cyl)     # Coerce to class "factor" with as.factor()
+summary(mtcars$cyl)                     # Prints each "level" (category) and frequency of each
+```
+
+<br>
+
+**Identify All Classes in a Dataset** by using the function `str()`, or "structure", which prints the:
+
+* Dimensions of the dataset, i.e. total rows (observations) and columns (variables)
+* Class of the data structure
+* Class of each variable
+* First few values of each variable
+* Quantitaty and name of each factor level
+
+```{r}
+str(iris)     # Print the structure of the "iris" dataset, or 150 measures of iris species
+```
+
+<br>
+
+## Importance of Coercion
+
+**Coercion in Data Visualization** is also very important. Observe the following. What do you notice about the x-axis?
+
+```{r}
+data(mtcars)
+plot(x = mtcars$cyl, 
+     y = mtcars$mpg,
+     col = "tomato",
+     xlab = "Number of Cylinders",
+     ylab = "Miles per Gallon",
+     main = "Cylinders vs. MPG")
+```
+
+**Note****:** R identifies two continuous variables and makes a scatterplot, assuming 5- and 7-cylinder engines are missing.
+
+<br>
+
+**Prevent Categorical Variables from Appearing Continuous** by coercing "numeric" variables to class "factor". 
+
+```{r}
+data(mtcars)
+plot(x = as.factor(mtcars$cyl),        # The only change is nesting the variable in as.factor()
+     y = mtcars$mpg, 
+     col = "tomato",
+     xlab = "Number of Cylinders",
+     ylab = "Miles per Gallon",
+     main = "Cylinders vs. MPG")
+```
+
+**Function Overloading** occurs as function `plot()` now acknowledges the "factor", creating a box plot.
+
+<br>
+
+**Coercion in Regression** is even more important. Using `lm()`, we'll try to create a linear model with the original `mtcars`.
+
+```{r}
+data(mtcars)
+my_lm <- lm(mpg ~ cyl, 
+            data = mtcars)
+print(my_lm)
+```
+
+**Incorrect Interpretation:** Per the coefficients, every unit of `cyl` added reduces `mpg` by 2.87. This is absurd.
+
+<br>
+
+```{r}
+data(mtcars)
+my_lm <- lm(mpg ~ as.factor(cyl), 
+            data = mtcars)
+print(my_lm)
+```
+
+**Correct Interpretation****:** 6-cylinder engines reduce `mpg` by 6.92, while 8-cylinder engines reduce `mpg` by 11.56.
+
+<br>
+
+## Practice
+
+**Coercing Numeric Data** is equally important, as demonstrated in the following scenario.
+
+**Scenario****:** You're colleague has written a PDF scraper to extract key Form 990 data, seen in dataset `form_990`:
+
+```{r}
+form_990 <- data.frame("FY_2017" = c("764882", "240739", "49212"), 
+                       "FY_2018" = c("841912", "263997", "41315"), 
+                       stringsAsFactors = FALSE, 
+                       row.names = c("Programming Expenses", 
+                                     "Administrative Expenses", 
+                                     "Fund Development Expenses"))
+print(form_990)
+```
+
+**Practice****:** Find the sum total of all expenses in fiscal years 2017 and 2018.
+
+* Determine the classe of each variable using `class()`.
+* Subset each variable in `form_990` using the `$` operator.
+* Use the appropriate coercion function to render the data usable.
+* Use function `sum()` to find the total of each fiscal year.
+* Use function `sum()` again on the totals.
+
+<br>
+
+**Conclusions****:** Identifying variable classes is a crucial first step in exploratory data analysis. As demonstrated above, failing to identify and coerce classes can be fatal to the accuracy of your analyses and visualizations. We've only looked at coercion with "numeric" and "factor" classes, but for nearly every data class (and there are many more), there is a way to coerce it to a more appropriate and actionable class.
+
+<br>
+
+## Further Resources: Factors
+
+**Learn More** about `factor()` and `as.factor()` by calling `help(factor)` and `help(as.factor)` within R. In addition, I highly recommend exploring the fourth module in DataCamp's free [Introduction to R](https://www.datacamp.com/courses/free-introduction-to-r).
+
+<br>
+
+# Text Data
+
+The following provides an overview of base R functions for data of class "character". Run the following in R.
+
+```{r}
+url <- "https://tinyurl.com/y9xuc5pa"
+construct <- read.csv(file = url, stringsAsFactors = FALSE); rm(url)
+```
+
+These are the records of *Quality Structures, Inc.*, the largest of multiple contractors working on Syracuse International Airport's 2018 renovations and retrieved via Freedom of Information Act (FOIA).
+
+Read the documentation here: [REIS GitHub Repository](https://github.com/jamisoncrawford/REIS). 
+
+<br>
+
+## An Introduction
+
+**Overview****:** Data of class "character" is often easily distinguishable due to quotations, e.g. `"this"`. 
+
+Any values you write or store are automatically converted to class "character" when using quotations. Observe:
+
+```{r}
+my_word <- "perspicacity"     # Quotes guarantee that value will be stored as class "character"
+class(my_word)
+print(my_word)
+```
+
+<br>
+
+**String Manipulation** is the act of manipulating text data, most often referred to as **strings**.
+
+We can think of "strings" as a *sequence of characters*, which may be alphabetical or numeric.
+
+<br>
+
+## Pasting Strings
+
+**Pasting** is the act of combining multiple strings to form a longer or more complex string, performed with `paste()`.
+
+```{r}
+x <- "I'm"
+y <- "learning"
+z <- "R!"
+paste(x, y, z, sep = " ")     # Argument "sep =" specifies the character between pasted strings
+```
+
+<br>
+
+**Notice that** this we've pasted together objects, but you can just as easily input the strings by hand:
+
+```{r}
+paste("I'm", "learning", "R!", sep = " ")
+```
+
+<br>
+
+**The versatility** of `paste()` is often underappreciated at first glance. We could goof off by tampering with `sep =`:
+
+```{r}
+paste("Millennial:", x, y, z, sep = ", like, ")
+```
+
+<br>
+
+**We could** do something more useful, like combine names in a character roster. First, let's create one:
+
+```{r}
+first <- c("Luis", "Cody", "Shannon", "Jamison")
+last <- c("Escoboza", "Peck", "Connor", "Crawford")
+roster <- data.frame(first, last)
+print(roster)
+```
+
+<br>
+
+**Now** we can use paste to make a "Surname, First Name" format, like so:
+
+```{r}
+paste(roster$last, roster$first, sep = ", ")
+
+```
+
+<br>
+
+**Now we can add it** as a new variable using `$`.
+
+```{r}
+roster$both <- paste(roster$last, roster$first, sep = ", ")
+print(roster)
+```
+
+<br>
+
+**We could also** create a sequence of URLs for a web crawler, e.g. adult literacy programs around Dallas, TX:
+
+```{r}
+url <- "https://www.nationalliteracydirectory.org/programs?q=75201&radius=25&student="
+iteration <- as.character(c(1:6))
+
+paste(url, iteration, sep = "")
+```
+
+<br>
+
+**Conclusions:** The *National Literacy Directory*, which provides the search results for the above pages, is owned by the *Dollar General Literacy Foundation* - and they absolutely do not want those data shared, despite the tremendous potential it could have in the hands of researchers for ameliorating today's adult literacy crisis. Fortunately, you can only search within a 25-mile radius, which limits the amount of search options.
+
+Of course, if you just change `radius=25` in `url` to, say, `radius=6000`, or 1/4 of the circumference of the earth, you'd have every adult education program in the United States, including Hawaii and Alaska. That's 537 individual pages of search results through which one could sequence, covering 10,730 programs. *But you should definitely not do that*.
+
+In sum, `paste()` is extremely useful. Never forget it.
+
+<br>
+
+# Mid-Session Review
+
+The following reviews key concepts with which we've practiced, emphasizing elements in the first half of the present work.
+
+<br>
+
+## Assignment
+
+* **Assignment** is the process of storing information within an object using `<-`
+* **Classes** depict variable type and determine how variables behave, e.g. "numeric", "character", etc.
+* **Concatenation** binds separate values into a vector using function `c()` and preserves distinctness
+
+```{r}
+my_object <- c(1, 3, 5)
+
+class(my_object)
+```
+
+<br>
+
+## Operators
+
+* **Arithmetic Operators** are used like any scientific calculator, (`+`, `-`, `*`, `/`)
+* **Relational Operators** compare values and evaluated expressions, e.g. `<`, `>`, `==`, etc.
+* **Logical Operators** combine relational operator statements, i.e. `|` and `&`
+    - Relational statements typically outputs logical values
+        - If a value meets the condition: `TRUE`
+        - If a value does not meet the condition: `FALSE`
+
+```{r}
+3 + 3 == 6 & 3 <= 12 / 4
+```
+
+<br>
+
+## Data Structures
+
+* **Objects** store values, functions, tabular datasets, and more advanced data structures
+* **Vectors** are one-dimensional arrays of one or more elements
+* **Matrices** are tabular data structures containing data of a uniform class
+* **Data Frames** are also tabular data structures, but contian mixed classes
+
+```{r}
+my_object <- 10
+
+my_vector <- c("a", "b", "c")
+
+my_matrix <- matrix(data = 1:4, 
+                    nrow = 2, 
+                    ncol = 2)
+
+my_dataframe <- data.frame("x" = c(1, 2, 3), 
+                           "y" = c("a", "b", "c"))
+```
+
+* **Printing** is the act of producing a value or values
+    - **Autoprinting** occurs simply by evaluating an object name
+    - **Explicit Printing** occurs when using function `print()`
+    
+```{r}
+my_vector
+
+print(my_dataframe)
+```
+    
+<br>
+
+## Subseting & Indexing
+
+* **Subset Variables** by using the `$` operator, e.g. `dataframe_name$variable_name`
+* **Index Vector Values** by inputting element position within brackets, e.g. `vector_name[3]`
+* **Index Tabular Values** by inputting row and column position, e.g. `dataframe_name[12, 5]`
+* **Subset All Rows or Columns** by leaving row or column position empty, e.g. `df[12, ]`
+* **Determine Position** of values meeting a specified condition using function `which()`
+
+```{r}
+mtcars$mpg[5]
+
+mtcars[5, "mpg"]
+```
+       
+<br>
+ 
+## Filtering
+
+* **Filtering Operations** provide "logical" output based on conditions using relational operators
+    - **Filter Vectors** by inserting relational operators within brackets, e.g. `vector[vector > 5]`
+    - **Filter Tabular Data** by inserting conditions in row or column positions, e.g. `df[var1 > 5, ]`
+* **Filtering with Objects** allows filtering conditions to be assigned to objects
+    - **Assign Filtering Conditions** using `<-` and comparators, e.g. `index <- df$variable < 15`
+    
+```{r}
+my_filter <- mtcars$mpg > 25
+
+mtcars[my_filter, ]
+```
+        
+<br>
+
+## Classes
+
+* **Variable Class** determines how a variable behaves, which may differ by function
+    - Critical to determine variable classes at outset of any analysis
+    - Determine a single variable's class using function `class()`
+    - Determine multiple variables' classes using function `str()` on a data frame
+    - Detemine if a variable is a specified class using `is.*()` functions, e.g. `is.character()`
+* **Variable Classes** include:
+    - **Numeric** variables contain quantitative data which may or may not be integers, e.g. `5.0` or `5`
+    - **Integer** variables contain quantitative data comprised of whole numbers, e.g. `5`
+        - Integers may be explicitly defined using `L`, e.g. `5L`
+    - **Double** variables contain quantitaive data with decimal points, e.g. `5.2`
+    - **Logical** variables are binary values comprised of `TRUE` and `FALSE`
+        - Logicals typically appear when detecting or filtering with relational operators
+    - **Character** variables contain qualitative data or text, e.g. `"Some text."`
+        - Characters may be explicitly defined using quotation marks, i.e. `""`
+    - **Factor** variables contain discrete, nominal, or categorical data
+        - Factors may be created explicitly using function `factor()`
+        - Categories are referred to as **levels**, which may be ordered to create ordinal variables
+        - View factor levels and their labels using function `levels()`
+        - Order or rename levels by using argument `levels =` and `labels =` in `factor()`
+* **Coercion** is the act of explicitly converting classes
+    - Coerce classes using `as.*()` functions, e.g. `as.numeric()`
+
+```{r}
+class(15)
+
+is.character("Some text.")
+
+as.logical(0)
+
+as.logical(1)
+```
+
+<br>
+
+## Strings & Pasting
+
+* **Strings** are sequences of characters nested in quotations to comprise character data
+    - Strings are explicitly written using quotes, e.g. `"This is a string."`
+* **Pasting** is the act of combining strings using the extremely versatile function `paste()`
+    - Argument `sep =` takes a character string for which to separate pasted values
+    - Function `paste0()` collapses pasted strings with no separator by default
+    
+```{r}
+values <- 1:3
+
+suffixes <- c("st", "nd", "rd")
+
+paste("This", "is", "my", 
+      paste0(values, suffixes), "string.", 
+      sep = " ")
+```
+
+<br>
+
+# String Fundamentals
+
+**Quotation marks in strings** are possible by using single quotes: `'Excel is "fine", thanks.'`
+
+**Strings without quotes** are possible using functions: 
+
+* `noquote()` for numbered strings
+* `writeLines()` for bare strings
+
+```{r}
+writeLines("You could make this an error message if you're writing a custom R function.")
+```
+
+**Convert numeric data to character data** using functions: 
+
+* `as.character()` for simple coercion
+* `format()` for customized formatting via arguments, including:
+    - Scientific Notation: `scientific =`)
+    - Comma Separators: `big.interval =` or `big.mark =`
+    - Alignment: `justify =`
+* `formatC()` for syntax in C language syntax via arguments, including:
+    - Positive Numbers: `flag = "+"`
+    - Negative Numbers: `flag = "-"`
+    - Leading Zeroes: `flag = "0"`
+
+```{r}
+format(x = 00003500, 
+       big.mark = ",", 
+       drop0trailing = TRUE)
+```
+
+**Further formatting options** are available using the ["scales" package](https://cran.r-project.org/web/packages/scales/scales.pdf). 
+
+<br>
+
+# Regular Expressions: Briefly
+
+**Regular Expressions**, in short, are using sequences of metacharacters for powerful pattern recognition.
+
+For example, the following metacharacters can be used in any `pattern =` string.
+
+* `.` indicates "any character"
+* `*` indicates "any number of times"
+* `^` indicates "beginning of string"
+* `$` indicates "end of string"
+* `\` indicates "ignore the following character, it's actually a [insert metacharacter]"
+
+**Important Caveat:** Since many patterns contain metacharacters, like `.`, you must keep **"regex"** in mind.
+
+* Imagine you're searching for `pattern = "Census Tract 5.00"`
+* Since `.` is a metacharacter, R interprets this as "5", any character, and "00"
+* Therefore, you have to use an escape sequence for certain characters: `\`
+    - `string = "Census Tract 5\.00"` will help ensure `.` really means `.`
+    - Otherwise, it may detect, e.g. `"Census Tract 5200"`
+
+**Don't Worry:** You won't memorize "regex" unless you use them everyday, but some things stick over time.
+
+* It's perfectly fine to simply look them up as needed.
+* Just be aware of them when using pattern detection!
+
+**Learn More:** To learn more about "regex", I recommend Jenny Bryan's [Stat 545: "Regular Expression in R"](http://stat545.com/block022_regular-expression.html).
+
+<br>
+
+<center>
+
+![*Even a rudimentary understanding of "regex" is powerful for pattern detection.*](https://imgs.xkcd.com/comics/regular_expressions.png)
+
+</center>
+
+<br>
+
+# Package "stringr"
+
+**Overview:** The "stringr" package is designed specifically for working with `character` data:
+
+* Authored by Hadley Wickham as a "wrapper library" for package "stringi" (Marek Gagolewski)
+* Essential *Tidyverse* package, interfacing with other packages in *Tidyverse* ecosystem
+* Performs simple text manipulation tasks quickly and well
+* Further Resources:
+    - [CRAN Documentation: "stringr"](https://cran.r-project.org/web/packages/stringr/index.html)
+    - [Author's Vignette: "Introduction to stringr"](https://cran.r-project.org/web/packages/stringr/vignettes/stringr.html)
+    - [RStudio Cheat Sheet: "Work with Strings"](https://www.rstudio.com/resources/cheatsheets/#stringr)
+
+**Unified, Consistent Framework:** All "stringr" functions: 
+
+* Begin with `str_` for easy autocompletion
+* Typically have a less intuitive counterpart function in base R
+* Always accept a vector of character values as the first argument
+
+**Installing & Loading:** The following installs and loads package "stringr" if undetected:
+
+```{r}
+if(!require("stringr")){install.packages("stringr")}
+library(stringr)
+```
+
+<br>
+
+## Pasting in "stringr"
+
+The "stringr" equivalent of function `paste()` is `str_c()`. Advantages over `paste()` include:
+
+* Propogates rather than coerces missing, or `NA` values
+* Collapses strings by default, i.e. `sep =` is `""`, similar to `paste0()`
+
+```{r}
+paste("The", "quick", "brown", "fox", NA, "over", "the", "lazy", NA)
+str_c("The", "quick", "brown", "fox", NA, "over", "the", "lazy", NA)
+str_c("The", "quick", "brown", "fox", "jumps", "over", "the", "lazy", "dog.", 
+      sep = " ")
+```
+
+<br>
+
+## Determining Length
+
+Function `str_length()` determines the number of characters in a given string:
+
+```{r}
+str_length("Duffle kerfuffle.")
+```
+
+The base R equivalent is function `nchar()`.
+
+<br>
+
+## Extracting Substrings
+
+Function `str_sub()` extracts a subset of characters determined by beginning and ending positions:
+
+```{r}
+order_records <- c("The order arrived at 03:02 PM EST, 03 December 2018.",
+                   "The order arrived at 12:19 PM EST, 03 December 2018.",
+                   "The order arrived at 09:53 AM EST, 03 December 2018.")
+
+arrivals <- str_sub(string = order_records,     # Input string or vector of strings
+                    start = 22,                 # Indicate position number to begin extraction
+                    end = 33)                   # Indicate position number to end extraction
+
+data.frame("arrival_time" = arrivals)           # Organize extracted data
+```
+
+<br>
+
+## Pattern Recognition
+
+Several "stringr" functions involve pattern recognition, which can be:
+
+* Written for an entire value, e.g. `string = "Tract 32"`
+* Written as part of a value with `fixed()`, e.g. `string = fixed("Tract 32)`
+* Written with more latitude using regular expressions, e.g. `string = ".* 32"`
+
+<br>
+
+## Detect Matches
+
+**Detect** patterns with `str_detect()`, which returns a logical value if conditions are met.
+
+```{r}
+inconsistent_labels <- c("Tract 32", 
+                         "census tract 32.00", 
+                         "trAct 32", 
+                         "ct 32",
+                         "tract 5.00",
+                         "CT 5")
+
+str_detect(string = inconsistent_labels, 
+           pattern = "32")                   # Only detects values containing "32"
+
+str_detect(string = inconsistent_labels, 
+           pattern = "32|5")                 # Detects values containing either "32" or "5"
+```
+
+<br>
+
+## Return Matches
+
+**Return** values containing a specified pattern using `str_subset()`:
+
+```{r}
+str_subset(string = inconsistent_labels,
+           pattern = "32")
+
+str_subset(string = inconsistent_labels,
+           pattern = "00")
+```
+
+<br>
+
+## Counting Matches
+
+**Quantify** values containing a specified pattern using `str_count()`:
+
+```{r}
+str_count(string = inconsistent_labels, 
+          pattern = "Tract|tract|trAct")
+
+str_count(string = inconsistent_labels, 
+          pattern = "0")
+```
+
+<br>
+
+## Splitting Strings
+
+**Split** strings into composite parts with `str_split()` by specifying a pattern on which to split:
+
+* Here, we'll use part of a review for *Fallout 76* on [*Metacritic*](https://www.metacritic.com/game/playstation-4/fallout-76) by user "noises1990"
+* Note: Punctuation has been modified slightly for instructional purposes
+
+```{r}
+fo_review <- "This is complete crap! I've been waiting 20 minutes on the loading screen to connect to the server! After I connect because of desync and replication issues with the server, I get killed! Have to wait another 5 minutes on the loading screen to respawn! I go into a building and get stuck on a pile of trash so I need to fast travel somewhere!"
+
+split_rev <- str_split(string = fo_review,
+                       pattern = "! ",         # Split string for every occurence of "! "
+                       simplify = TRUE)        # "FALSE" returns list, "TRUE" returns matrix
+
+data.frame("sentences" = split_rev[, 1:5], stringsAsFactors = FALSE)
+```
+
+<br>
+
+## Find & Replace Operations
+
+**Find & Replace** the detected patterns with:
+
+* `str_replace()` for only the first pattern detected in string
+* `str_replace_all()` for all patterns detected in string
+
+```{r}
+print(inconsistent_labels)
+
+str_replace_all(string = inconsistent_labels, 
+                pattern = ".00| |[a-zA-Z]*",   # Detect ".00", OR " ", OR any/all letters
+                replacement = "")              # Replace with "", or nothing!
+```
+
+<br>
+
+## Trimming Whitespace
+
+**Trimming** eliminates any extra spaces surrounding characters using `str_trim()`.
+
+* Argument `side =` indicates which side to trim: `"left"`, `"right"`, or `"both"`
+
+```{r}
+str_trim(string = "        mad whitespace    ", 
+         side = "both")
+```
+
+<br>
+
+## Padding Strings
+
+**Padding** is the opposite of trimming, where `str_pad()` allows you to add characters.
+
+* Argument `side =` indicates which side to pad: `"left"`, `"right"`, or `"both"`
+* Argument `width =` indicates the maximum number of characters achieved via padding
+* Argument `pad =` indicates the character with which to pad
+
+Here, we'll use Syracuse's Census Tract 61.02. Notably:
+
+* Tract-level FIPS codes *must have 6 characters*
+* Since we don't have 6 characters, we can pad with leading zeroes
+
+```{r}
+str_pad(string = "6102", 
+        width = 6, 
+        side = "left", 
+        pad = "0")
+```
+
+Use in concert with `paste()`, `paste0()`, or `str_c()` to create a full FIPS code!
+
+<br>
+
+# Applied Practice
+
+**Instructions:** Run the following code to read in Census Geocoder output: `geocoded`.
+
+* These data are real output for the location of reported crimes in Syracuse.
+* Column names found in "Record Layouts for Output" under "Batch Geocoding Process".
+* See the Census output documentation [here](https://www.census.gov/geo/maps-data/data/geocoder.html).
+
+```{r warning = FALSE, echo = TRUE, message = FALSE, cache = TRUE}
+library(readr)
+
+url <- "https://tinyurl.com/y92r2qcd"
+
+names <- c("id", "input", "indicator", "type", "output", "coords", 
+           "line_id", "id_side", "state", "county", "tract", "block")
+
+geocoded <- read_csv(file = url, 
+                     col_names = names)
+
+geocoded <- geocoded[which(complete.cases(geocoded)), ]
+```
+
+<br>
+
+**Challenges:** Perform the following tasks using the `geocoded` dataset:
+
+1. Recall that "tract" codes are not numeric values, but labels.
+    a. Coerce the appropriate columns to class "character" using an `as.*()` function.
+
+2. Extract the ZIP code as a substring from variable `output`.
+    a. Store these extracted data in a new column: `zip`
+    b. Hint: Initialize this new column using `geocoded$zip <- NA`
+    
+3. Using column `output`, detect *which rows* contain "EAST SYRACUSE, NY".
+    a. Save these rows in a new dataset: `es_geocoded`
+
+4. Initialize variable `fips` and paste variables `state`, `county`, and `tract`.
+    a. Hint: Initialize this new column in `geocoded` using `geocoded$fips <- NA`
+
+5. Transform variable `tract` in `geocoded` to eliminate leading and trailing zeroes.
+    a. Store these in a new variable, `ct_abbr`, by running `geocoded$ct_abbr <- ...`
+
+

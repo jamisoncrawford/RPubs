@@ -1,0 +1,673 @@
+---
+title: 'Intro to R: Operators'
+author: "Jamison Crawford, CNYCF"
+date: "September 27, 2018"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 4
+    number_sections: true
+---
+
+**Latest Versions & Updates:** This markdown document was built using the following versions of *R* and *RStudio*:
+ 
+* R v. 3.5.1
+* RStudio v. 1.1.456
+* Document v. 1.1
+* Last Updated: 2018-09-27
+
+# How to Use this Guide
+ 
+We've seen a few snippets of code in [Intro to R: Nuts & Bolts](http://rpubs.com/JamisonCrawford/nutsandbolts). Now, we're going to start seeing some more **expressions** "in the field". Thanks to the implementation of **literate programming**, I'm able to weave machine-readable R **expressions** into this work while explaining those **expressions** in human-readable language.
+ 
+<br>
+ 
+## Unformatted Font
+
+Note that unformatted font, for example, `this`, `that`, and `the other thing`, is used to indicate machine-readable language, even if it's used in-line, like the example. It's a simple and unobtrusive way to differentiate human-readable language from **expressions** intended for machine consumption. Note this particular formatting, or lack thereof, when you see it - typically, it's used to flag datasets, variables, entire **expressions**, **function** and **package** names, and **operators**. 
+ 
+<br>
+ 
+## Code Chunks 
+
+So-called **code chunks**, unlike `unformatted font`, are much more easy to discern. "Code chunks" allow **literate programming** authors to insert machine-readable code in human-readable text. Behind the scenes, "code chunks" are often executed, without alerting the reader, in order to produce tables, visualizations, interactive tools, and more. In instructional materials, e.g. the present work, **code chunks** are used for demonstrative purposes, such as how to use a particular **function**. The following is an example of two "code chunks", the first of which executes without output, and the second of which will both execute the **expression** and **print** the resulting output.
+
+```{r message=FALSE, warning=FALSE, cache=TRUE}
+my_example <- "This is an example of a code chunk."
+```
+ 
+<br>
+ 
+Now, we'll both both execute and **print** the results.
+ 
+```{r}
+print(my_example)
+```
+ 
+<br>
+
+## Run Example Code 
+
+When I first began studying R, one of my more regrettable mistakes - apart from not learning R earlier in life - was that I'd read literature on R and simply look at the coding examples. This was an error. If possible, *try running every bit of ostensibly non-malicious code you find*. There's a reason most literature on R takes advantage of **literate programming** via **code chunks**, so read with *RStudio* open, and experiment with new **expressions** in the R console often. 
+ 
+<br>
+ 
+**Using Local Data****:** Where appropriate, we'll either demonstrate using or practice with squeaky clean, local data from [CNY Vitals Pro](https://pro.cnyvitals.org/login). These data are invariably well-formatted, small in size, and excellent for instruction. As other sources are introduced, don't just use R's built-in data, use the data from the world around you. It's a bit more motivating, and you'll hone your domain expertise and hacking skills simultaneously.
+ 
+<br>
+ 
+# R: An Overdesigned Calculator
+
+No introduction to R would be complete without an introductory example of how R functions like a scientific calculator - a very powerful calculator, but a calculator nonetheless. Understanding this, however, is the foundation on which rests the architecture of your hacking skills.
+ 
+<br>
+ 
+## Arithmetic Operators
+ 
+Data are comprised of **values**. Though there are many kinds of data, typically the most common are **numeric values**, which work just like numbers in a basic calculator. We can perform operations on **numeric** data using arithmetic **operators**, for example:
+
+* `+` for addition
+* `-` for subtraction 
+* `/` for division
+* `*` for multiplication
+* `^` for exponents
+* `()` for parentheses
+
+These arithmetic **operators** may be used in **expressions** to perform arithmetic calculations, like addition:
+ 
+```{r}
+2 + 2
+```
+ 
+Likewise, there's subtraction:
+
+```{r}
+5 - 1
+```
+ 
+Let's not forget multiplication or division:
+ 
+```{r}
+(3 * 4) / 3
+```
+ 
+And, of course, exponents, like 2 *cubed*:
+
+```{r}
+2^2
+```
+ 
+<br>
+ 
+## Order of Operations
+
+Do you recall the ["order of operations""](https://en.wikipedia.org/wiki/Order_of_operations), sometimes referred to as "operator precedence", you learned back in grade school? Me neither. But I do remember "Please Excuse My Dear Aunt Sally" (or "PEMDAS"), i.e. (1) Parentheses, (2) Exponents, (3) Multiplication, (4) Division, (5) Addition, and (6) Subtraction. R typically follows the same order for more complex **expressions**.
+
+This holds true in R, as well. Let's look at a more complex **expression**:
+ 
+```{r}
+2 + (6 * 2) / ((3^2) / 3) - 2
+```
+ 
+Here, R evaluates the expressions in the parentheses first ("Please" or "P"), i.e. `(6 * 2)` and `((3^2) / 3)`, respectively. Because `(3^2)` are parentheses inside a parentheses, it's evaluated before all others. It's like the film *Inception*, except it makes sense.
+ 
+```{r}
+(3^2)
+```
+ 
+```{r}
+(9 / 3)
+```
+ 
+That was the second instance of `()` in the **expression**, albeit broken down into smaller pieces. Let's see if R calculates the entire contents within the `()` in the same manner:
+ 
+```{r}
+((3^2) / 3)
+```
+
+Sweet, it seems so. Let's look at all the operations within `()`, i.e. `(6 * 2) / ((3^2) / 3)`. Here, R follows "PEMDAS" to the letter (heh). It begins by **evaluating** the contents of the `()` ("Please" or "P"), followed by **evaluation** of the `/` ("Dear" or "D"). 
+ 
+```{r}
+(6 * 2) / ((3^2) / 3)
+```
+ 
+The `2 +` and `- 2` cancel each other out, but would be **evaluated** last, per "PEMDAS", resulting in 4.
+ 
+<br>
+ 
+# Objects & Assignment
+ 
+R is an [**object-oriented programming**](https://en.wikipedia.org/wiki/Object-oriented_programming), or **OOP** language. While explaining **OOP** falls outside the scope of this introduction, it's critical to understand the importance of **objects**. In fact, you may hear the word **"object"** quite a bit, as **objects** are essentially devices that store information. In **OOP**, **objects** are self-contained and fiercely guarded, and may only be acted on or changed through the express use of **functions** (sometimes referred to as "methods"). The curious learner may wish to learn about this **OOP** property, called ["encapsulation"](https://en.wikipedia.org/wiki/Encapsulation_(computer_programming)).
+ 
+<br>
+ 
+## Objects
+
+*Just about everything*, apart from bare **values**, are **objects**. Data are stored in various ways within **objects**, from a small collection of values to massive, tabular datasets. A single value (i.e. a datum) may be stored in an **object**. **Functions** are stored as **objects**. A **string**, or a sequence of letters or numbers, may be stored in an **object**. Even arithmetic **operators**, which are actually **functions**, are also **objects**, albeit "primitive" ones.
+
+R contains many built-in objects, from functions to datasets. By way of example, let's look at two objects: `letters` and `LETTERS`, which contain all 26 letters in the English alphabet in lower and upper case, respectively. By simply typing the name of the object, `letters`, R uses an **auto-printing** mechanism to automatically **print** the contents of the object. 
+
+```{r}
+letters
+```
+
+Though it's not often necessary outside of creating new **functions** or making your code more readable, we can explicitly command R to **print** the object's contents using the `print()` function. Let's try this with the object `LETTERS`.
+
+```{r}
+LETTERS
+```
+
+This is also demonstrative of how R is *case sensitive*. For example, `LetteRs` is not recognized as a built-in **object**.
+
+<br>
+ 
+## Assignment
+ 
+During an R session, **objects** are typically stored locally in your workspace. We can easily store individual values, datasets, functions, and even entire **expressions** by using the **assignment operator**, or `<-`. The **object** to the left of the **assignment operator** is *assigned* the information to the right of the **assignment operator**.
+
+Let's see what this looks like in action. We'll store the **numeric value** `7` in the **object** named `lucky_number`:
+ 
+```{r}
+lucky_number <- 7
+```
+
+Now, let's print the contents of the **object**, `lucky_number`, using R's **auto-print** mechanism. That is, we simply type and run the object name:
+
+```{r}
+lucky_number
+```
+ 
+<br>
+ 
+## Assigning Expressions
+
+Like singular **values**, we can assign entire expressions to an **object**. Let's use the same expression on which we practiced the *order of operations*, `2 + (6 * 2) / ((3^2) / 3) - 2`. We'll name the **object** `my_equation`. Note that the entirety of the **expression** to the right of the **assignment operator** (`<-`) will be evaluated and stored in the **object** to the left of the **operator**.
+
+```{r}
+my_equation <- 2 + (6 * 2) / ((3^2) / 3) - 2
+```
+
+Recall that all of the arithmetic **expressions** in the above examples **evaluated** to 4. Let's call the **object** `my_equation` to see what happens.
+ 
+```{r}
+my_equation
+```
+
+Egad! The **object**, `my_equation`, now stores a single **value**: 4.
+ 
+<br>
+ 
+## Objects in Scripts
+
+In the above example, the **object**, `my_equation`, and the **value**, 4, are *interchangeable*. Let's see what that means by way of example. First, we'll use the **object** `lucky_number` in an arithmetic operation. Recall that the **value** in `lucky_number` is 7:
+ 
+```{r}
+lucky_number - 2
+```
+ 
+By subtracting 2 from `lucky_number`, the **expression** then **evaluates** to 5, i.e. `7 - 5`. 
+ 
+What about `my_equation`, our **object** that stored an **expression** that **evaluated** to a single **value**: 4?
+ 
+```{r}
+1 + my_equation
+```
+
+Again, the **object** acts interchangeably with the **value**, resulting in 5. For the grand finale, let's find the sum of **objects** `lucky_number` and `my_equation`, equal to 7 and 4, respectively:
+ 
+```{r}
+lucky_number + my_equation
+```
+ 
+As one might expect, both **objects** are **evaluated** arithmetically to `7 + 4`, respectively, summing to 11. *This has enormous implications.*
+ 
+<br>
+ 
+### Pro Tips: Spaces & Quotes
+ 
+Do not use a "space" when naming an **object**. An **error message** will be thrown, as R will fail to recognize what may be perceived as two individual **objects**. This returns us to the **conventions** discussed in [Intro to R: Nuts & Bolts](http://rpubs.com/JamisonCrawford/nutsandbolts), and especially **case**. When naming objects, you can use periods (`.`), underscores (`_`), or `CamelCaps` to created compound **object** names of more than one word.
+
+What's more, R only recognizes objects when they are "bare". That is, when they are not in quotes. Observe:
+
+```{r}
+lucky_number
+```
+ 
+Compare this to:
+
+```{r}
+"lucky_number"
+```
+ 
+In the first scenario, R is able to recognize that `lucky_number` is an **object**, and correctly **prints** its contents. In the second scenario, the quotations (`""`) signal to R that `"lucky_number"` is not an **object**, but a **string** (a sequence of characters). In effect, it simply **prints** the sequence as output. Keep this in mind going forward - sometimes you may need to add quotes, other times you may need to omit them, depending on your intention. Like with *case sensitivity*, R is also sensitive to *quotation*, and this may be a minor source of frustration for new R users.
+ 
+<br>
+
+## Listing Objects
+
+Once you've initialized an **object**, whether it contains information or is entirely empty (which is possible), *RStudio* neatly lists stored **objects** in the upper-right "Environment" panel, as well as displays the first few **values** stored, if possible. You can **print** all stored **objects** to the R **console** or use them in your code. If you happen to have many **objects** stored, you can easily print those objects with the **function** `ls()`, the "List Objects" **function**. Note that `ls()` requires no additional inputs.
+
+```{r}
+ls()
+```
+ 
+<br>
+ 
+<center>
+ 
+![*RStudio neatly arranges and labels your objects in the "Environment" panel.*](environment_pane.jpg)
+ 
+</center>
+ 
+<br>
+
+## Removing Objects
+
+Lastly, we can easily remove an **object** from our workspace or other **environments** using the **function** `rm()` and inputting the name of the **object** to be removed. Here, we'll remove `lucky_number` using `rm()` and then inspect our remaining **objects** using **function** `ls()`.
+ 
+```{r}
+rm(lucky_number)
+ls()
+```
+
+Function `rm()` may not seem immediately useful, but it can be very beneficial if you "clean as you go", similar to preparing a meal at home. As soon as an object is obsolete, remove it with `rm()` to keep your workspace organized.
+ 
+<br>
+ 
+### Pro Tip: Remove All Objects
+
+You can combine the "List Objects" function `ls()` and "Remove Objects" function `rm()` to remove all **objects** present in your workspace. The input to `ls()` requires an **argument**, or a specified input to a **function**: `list =`. We'll learn more about **arguments** when we discuss the anatomy of a function, but for now, it's useful to know how to do this both in your **script** or in **console**.
+
+```{r}
+rm(list = ls())
+```
+
+Instead of using the above code, you can simply click on the broom icon located in the upper-right "Environment" panel in *RStudio*.
+
+<br>
+ 
+<center>
+ 
+![*You can remove all objects by clicking the broom icon in RStudio's "Environment" panel.*](remove_all_img.jpg)
+ 
+</center>
+ 
+<br>
+
+# Logical Statements
+
+Aside from arithmetic operators, R also evaluates **relational operators**, sometimes called "comparators". In human-readable format, **relational operators** are often described as:
+
+* "Greater than"
+* "Less than"
+* "Equal to"
+* Etc.
+
+Unlike the output of arithmetic operators, which are generally **numeric**, output from **relational operators** are **logical**, that is, they are either one of two values: `TRUE` or `FALSE`. As an aside, you can determine whether a value or set of values (including **objects**) are **numeric** or **logical** by calling the `class()` function to determine their **class**.
+ 
+```{r}
+class(15)
+```
+
+```{r}
+class(TRUE)
+```
+
+We'll learn more about **classes** in later tutorials.
+
+**Relational operators** or **logical values** are also referred to as "binary" or "Boolean". For an in-depth treatment of logical operators, the curious learner may read the [official CRAN documentation](https://stat.ethz.ch/R-manual/R-devel/library/base/html/Logic.html).
+
+<br>
+
+## Relational Operators
+ 
+You can probably think of a few different **relational operators** now that we've defined them. To wit, they include:
+
+* `>` for "greater than"
+* `<` for "less than"
+* `>=` for "greater than or equal to"
+* `<=` for "less than or equal to"
+* `==` for "exactly equal to"
+* `!=` for "not equal to"
+
+Again we may fuzzily rely on our grade school takeaways. Invariably, **logic statements** which satisfy the criteria to be true will always result in `TRUE`, while statements which do not satisfy the expression's criteria are evaluated as `FALSE`.
+
+Let's begin with a simple example: `5 == 5`, or "5 is equal to 5". Hopefully, we can evaluate *a priori* that this statement is, in fact, `TRUE`. Let's run it in the R console to find out:
+
+```{r}
+5 == 5
+```
+
+As suspected, `5 == 5` evaluates to `TRUE`. Let's observe another statement, `5 > 10`, or "5 is greater than 10", which we suspect will evaluate to `FALSE`:
+
+```{r}
+5 > 10
+```
+
+Again, we're right on the money.
+ 
+<br>
+ 
+## Negation
+ 
+Interestingly, the `!` operator is the *negation* of a statement. With this operator present in a **logical statement**, it negates the **logical** values evaluated, i.e. `TRUE` becomes `FALSE`, and vice versa. Observe how the statement `5 != 3`, or "5 is not equal to 3", which we may evaluate to be `TRUE`:
+
+```{r}
+5 != 3
+```
+
+When beginning a **logical statement** with `!`, while the statement is wrapped in parantheses, `()`, it negates the entirety of the statement. Let's negate the evaluation of `10 < 20`, or "10 is less than 20":
+
+```{r}
+!(10 < 20)
+```
+
+While `10 < 20` evaluates to `TRUE`, we negate the entire **logical statement** using the `!` operator, instead evaluating to `FALSE`.
+
+<br>
+
+## Logical Operators
+
+**Logical operators** combine **logical statements** in a manner which evaluates to `TRUE` if either one, more than one, or all **logical statements** evaluate to `TRUE`. Let's further define these:
+
+* `&` or `&&` for "and": Two or more statements evaluate to `TRUE`
+* `|` or `||` for "or": At least one statement evaluates to `TRUE`
+
+Let's take a gander at an example to better understand how **logical operators** work. First, the `&` operator evaluates two or more statements and, if all evaluate to `TRUE`, the entire expression also evalautes to `TRUE`. We'll use two simple statements (sometimes referred to in this context as "operands"): `1 == 1` or "1 equals 1" and `10 < 5`, or "10 is less than 5". Since the first statement is `TRUE` and the second is `FALSE`, the entire expression evaluates to `FALSE`, since not all criteria for `TRUE` are met in the expression:
+
+```{r}
+1 == 1 & 10 < 5
+```
+
+Simple enough. Again, `&` requires that both operands be `TRUE` to evaluate the entire expression as `TRUE`.
+ 
+We can make this expression evaluate to `TRUE` by using negation with the `!` operator. Since `10 < 5` evaluates to `FALSE`, wrapping the statement in parentheses and preceding it with `!` will coerce R to evaluate it as `TRUE`, i.e. `TRUE & TRUE`.
+
+```{r}
+1 == 1 & !(10 < 5)
+```
+
+Cool! 
+
+Related to the `&` ("and") operator is `|` ("or"), which only requires 1 of 2 operands to be `TRUE`. Let's evaluate our original example, `1 == 1 & 10 < 5`. Recall that the former operand is `TRUE`, while the latter is `FALSE`. Since we'll instead use `|` ("or"), only 1 operand needs to be `TRUE`. Therefore, the following should evaluate to `TRUE`:
+
+```{r}
+1 == 1 | 10 < 5
+```
+
+**Takeaway: Relational** and **logical operators** can create very complex **logical statements**, but *logic is a pillar of coding*, and the more you hone your abilities in logic, the better you'll be able to parse code into individual elements and understand how they interact. Just as important, **relational operators** are key to **filtering** data based on criteria, as well as [**control flow structures**](https://en.wikipedia.org/wiki/Control_flow) - i.e. if $x$ is greater than $y$, perform $z$.
+
+We'll practice more with logic at the end of this tutorial.
+
+<br>
+
+## Logic & Objects
+
+Recall that **objects** may store one or more **values** and may be used as variables in arithmetic operations. The same is true in **logical statements**. Here, we'll assign the value `25` to object: `five_squared` and evaluate a simple **logical statement**. First, let's perform an **assignment statement** with the **assignment operator**, or `<-`:
+
+```{r}
+five_squared <- 25
+```
+
+Now, let's exponentiate the value `5` using the arithmetic operator for exponents, `^`, and see if it equals `25`, the value stored in `five_squared`:
+
+```{r}
+five_squared == 5^2
+```
+
+Again, this has broad implications in **Object-Oriented Programming (OOP)**. 
+
+<br>
+
+# Vectors
+
+We've seen how to store a single value in an **object**, as we did with `five_squared` (25) and `lucky_number` (7) before that. One of the most simple data structures in R for storing multiple values of the same **class** is known as a **vector**, and may be created using the *concatenate* function, or `c()`. Function `c()` takes an infinite number of values of the same **class**, separated by commas (`,`) as input. Observe:
+
+```{r}
+c(2, 4, 6, 8, 10)
+```
+
+Some R users refer to this as "combining" values, which is incorrect. In *concatenation*, using `c()`, values are stored as distinct **elements**. You can think of "combining" values as a "melting pot", where multiple values are combined to create a single value, while "concatenating" values is more of a "salad bowl". Concatenated values preserve the distinct elements as separate from one another, allowing you to *extract* a crouton or a cherry tomato, while keep the values organized in container of sorts.
+
+<br>
+
+## Vector Objects
+
+We can assign *concatenated* values of the same **class** to an object using function `c()` and assignment operator `<-`:
+
+```{r}
+even_numbers <- c(2, 4, 6, 8, 10)
+```
+
+Print the contents of the **vector** `even_numbers` using R's **auto-print** mechanism by running the nae of the **object**:
+
+```{r}
+even_numbers
+```
+
+The number of **elements** in a vector are measured in *length* using function `length()`. We can determine how "long" a vector is, i.e. how many **elements** it contains, by passing the **object** name as an **argument** to `length()`. For example, recall that `letters` is a built-in object containing all the lowercase letters of the English alphabet. How many **elements** do you believe exist in this **object**? Let's find out:
+
+```{r}
+length(letters)
+```
+
+What about our newly-created **vector**, `even_numbers`?
+
+```{r}
+length(even_numbers)
+```
+
+You'll work with **vectors** frequently, so it's important to understand how they're created, measured, and used.
+
+<br>
+
+## Recycling
+
+You should think of a single value, e.g. `29`, as a **vector** of length `1`. That is, it is a **vector** with only one element!
+
+R has a special property known as **recycling**. **Vectors**, when interacting with one another, will evluate on an element-by-element basis (for better or worse). Let's create a new **vector**, `odd_numbers`, with the same length as `even_numbers`.
+
+```{r}
+odd_numbers <- c(1, 3, 5, 7, 9)
+```
+
+Again, we'll verify the lengths of `even_numbers` and `odd_numbers` using function `length()` and use a **logical statement** to confirm that their lengths are equal:
+
+```{r}
+length(even_numbers)
+length(odd_numbers)
+length(even_numbers) == length(odd_numbers)
+```
+
+Awesome! Now let's create a **vector** of length `1`, stored in an **object** named `one_element`. The value stored will be `5`. We'll confirm the length with `length()`:
+
+```{r}
+one_element <- 5
+length(one_element)
+```
+
+Since `even_numbers` is of length `5` and `one_element` is of length `1`, using a **relational operator** between the two **vectors** will force R to **recycle** the single-element vector iteratively over each of the 5 elements in `even_numbers`. For example, let's evaluate `one_element < even_numbers`. 
+ 
+```{r}
+one_element < even_numbers
+```
+
+What happened? R **recycles** the value `5` in `one_element` iteratively, in 5 separate comparisons, for each element of `even_numbers`. That is:
+
+* `5 < 2`
+* `5 < 4`
+* `5 < 6`
+* `5 < 8`
+* `5 < 10`
+
+In effect, these return a new **vector** comrpised of 5 **logical values** for each evaluation!
+
+<br>
+
+# Application
+
+Let's apply these new techniques to a local dataset from [CNY Vitals Pro](https://pro.cnyvitals.org/). Specifically, we'll look at ["Poverty Over Time" in Syracuse](https://pro.cnyvitals.org/profile/syracuse#poverty-over-time). Run the following code to store these data as object: `poverty`. These data originate in Census ACS, which you may [explore here](https://censusreporter.org/tables/B17001/).
+
+```{r}
+url <- "https://tinyurl.com/ybbpdc9q"
+poverty <- read.csv(url, stringsAsFactors = FALSE)
+rm(url)
+```
+
+We'll also install the `dplyr` package to keep things simple. Don't mind the code for now, but do run it in your console!
+
+```{r warning=F, message=F}
+if(!require(dplyr)){install.packages("dplyr")}
+library(dplyr)
+```
+
+<br>
+
+## Filtering with Logic
+
+We can use logical statements to filter the values of a vector using package `dplyr` and function `filter()`. First, we call the name of the dataset, `poverty`, as the first **argument**, and the second argument is a **logical statement** with the dataset's variable name, then the logical statement.
+
+First, take a look at the contents of `poverty` with `dplyr` function `glimpse()`:
+
+```{r}
+glimpse(poverty)
+```
+
+Note that there are 416 observations (rows). Let's create a statement which **filters** variable `Poverty.Line.Status` by `below`, so we only view data on demographics *below the poverty line*. We'll assign the results to a new variable: `poverty_below`:
+
+```{r}
+poverty_below <- filter(poverty, Poverty.Line.Status == "below")
+```
+
+Note that instead of `==` applied to a **numeric** value, we've applied it to a **character value**: `below`. Let's inspect our new dataset, `poverty_below` with function `glimpse()`.
+
+```{r}
+glimpse(poverty_below)
+```
+
+We've effectively split the data in half! Now there are 208 observations. Say we're interested in only analyzing data from 2014 or later. We can create a new statement with **relational operator** `<=` ("greater than or equal to") on variable `Year`. We'll store this in object `poverty_below_2014_up`:
+
+```{r}
+poverty_below_2014_up <- filter(poverty_below, Year >= 2014)
+```
+
+Notice how we used the input to `filter()` as the newly created object `poverty_below`. Let's quick check the new number of rows and columns in `poverty_below_2014_up` using function `dim()`, i.e. "dimensions":
+
+```{r}
+dim(poverty_below_2014_up)
+```
+
+Great! We've successfully reduced the number of observations from 416 to 78. Now we can perform a more focused analysis.
+
+<br>
+
+### Pro Tip: Criteria-Based Counts
+
+We may not always want to filter our dataset to explore or verify some sort of information. For example, using the `poverty` dataset with which we started, we can simply print a list of **logical** values depending on some criteria we've set. You can **subset** a variable from a dataset using the name of the dataset, the `$` operator, and the name of the variable. For example:
+ 
+```{r}
+poverty$Year
+```
+
+This actually prints a **vector** comprised of the value of variable `Year` for every single observation ($n$ = 416). What happens if we use a **relational operator** on this **vector**? Say we're only interested in data from 2011 and want to know how many observations match this criteria. Observe:
+
+```{r}
+poverty$Year == 2011
+```
+
+The expression simply prints a number of **logical** values, with `TRUE` appearing for values occurring in 2011.
+ 
+<br>
+ 
+We can do better. Using function `which()`, we can determine the row numbers for all observations which evaluate to `TRUE`.
+
+```{r}
+which(poverty$Year == 2011)
+```
+
+That might not be immediately useful, but it will help later, I promise. What may be more useful in the context of this tutorial is knowing the number of observations that are `TRUE`, i.e. how many obseervations occur in 2011.
+ 
+<br>
+ 
+Recall that **logical** values are also referred to as "binary" values. This is because, under the hood, a `FALSE` is represented numerically as `0`, while a `TRUE` is represented numerically as `1`. Observe:
+
+```{r}
+TRUE == 1
+```
+
+[Mind blown](https://i.giphy.com/media/xT0xeJpnrWC4XWblEk/giphy.webp).
+
+If that's the case, in theory, the sum of all `TRUE` values, each representing `1`, will also provide the total **count** of observations which satisfy the **logical statement**. So how many observations occur in 2011? We can determine this with function `sum()`:
+
+```{r}
+sum(poverty$Year == 2011)
+```
+
+There are 52 observations in 2011. Pretty neat!
+
+<br>
+
+# Applied Practice Challenges
+
+The following provides a list of challenges and instructions using **logical statements**. Some are thinking exercises to hone your logic, while others are applied to local data on "Educational Attainment" in Onondaga County from *CNY Vitals Pro*. Use the following code to read in object `education`:
+
+```{r}
+url <- "https://tinyurl.com/ya7xccbn"
+education <- read.csv(url, stringsAsFactors = FALSE)
+rm(url)
+```
+
+<br>
+
+## Logic Challenges
+
+**Instructions:** The following is a list of **logical statements**. Using the information provided in this tutorial and your own skill to carefully consider which of the following statements evaluate to either `TRUE` or `FALSE`. Run the code in your R console to check your answers.
+
+1. `20 > 50`
+ 
+<br>
+ 
+2. `!(30 > 40)`
+ 
+<br>
+ 
+3. `33 * 3 <= 100`
+ 
+<br>
+ 
+4. `TRUE | FALSE`
+ 
+<br>
+ 
+5. `(TRUE | 22 > 75) & !(150 != 150)`
+
+<br>
+
+## Logical Filters
+
+**Instructions:** Use the following prompts for each challenge and the dataset `education` to determine an answer. Some challenges may ask you to use a new function, like `mean()` or `median()`. Recall that you can subset a variable from a dataset using `dataset_name$variable_name` notation.
+ 
+<br>
+ 
+1. Write a logical statement for variable `Year` in dataset `education`. Use `sum()` to find the number of observations in *after, not during,* 2014.
+ 
+<br>
+ 
+2. Observe the unique values of `Education.Attained`:
+
+```{r}
+unique(education$Education.Attained)
+```
+
+Use a logical statement in function `filter()` to those only observations with "MasterDegree" in variable `Education.Attained`. Store the results in object `masters` with the assignment operator (`<-`). It should start of with `masters <- filter(education, Education.Attained ___ _______)`. Use function `mean()` on `masters$Population.Sum` to find the average number of county residents with a Master's Degree.
+ 
+<br>
+ 
+3. Use some of the above guidance, how many Onondaga residents had a Bachelor's Degree in 2013?
+
+<br>
+
+## Fin
+
+Great job! You know have a solid grasp on arithmetic, relational, and logical operators in R! With just a few of the above examples, I hope you can see just how important these concepts are in data analysis and beyond.

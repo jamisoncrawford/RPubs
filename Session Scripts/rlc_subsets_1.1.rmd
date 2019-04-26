@@ -1,0 +1,718 @@
+---
+title: 'Intro to R: Subsets & Indices'
+author: "Jamison Crawford, MPA"
+date: "October 11, 2018"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 4
+    number_sections: true
+---
+
+**Latest Versions & Updates:** This markdown document was built using the following versions of *R* and *RStudio*:
+ 
+* R v. 3.5.1
+* RStudio v. 1.1.456
+* Document v. 1.1
+* Last Updated: 2018-10-25
+
+# How to Use this Guide
+ 
+Thanks to the implementation of **literate programming**, I'm able to weave machine-readable R **expressions** into this work while explaining those **expressions** in human-readable language.
+ 
+<br>
+ 
+## Unformatted Font
+
+Note that unformatted font, for example, `this`, `that`, and `the other thing`, is used to indicate machine-readable language, even if it's used in-line, like these examples. It's a simple and unobtrusive way to differentiate human-readable language from **expressions** intended for machine reading. Note this particular formatting, or lack thereof, when you see it - typically, it's used to flag datasets, variables, entire **expressions**, **function** and **package** names, and **operators**. 
+ 
+<br>
+ 
+## Code Chunks 
+
+So-called **code chunks**, unlike `unformatted font`, are much more easy to discern. "Code chunks" allow **literate programming** authors to insert machine-readable code in human-readable text. Behind the scenes, "code chunks" are often executed, without alerting the reader, in order to produce tables, visualizations, interactive tools, and more. In instructional materials, e.g. the present work, **code chunks** are used for demonstrative purposes, such as how to use a particular **function**. The following is an example of two "code chunks", the first of which executes without output, and the second of which will both execute the **expression** and **print** the resulting output.
+
+```{r message=FALSE, warning=FALSE, cache=TRUE}
+my_example <- "This is an example of a code chunk."
+```
+ 
+<br>
+ 
+Now, we'll both both execute and **print** the results.
+ 
+```{r}
+print(my_example)
+```
+ 
+<br>
+
+## Run Example Code 
+
+When I first began studying R, one of my more regrettable mistakes - apart from not learning R earlier in life - was that I'd read literature on R and simply look at the coding examples. This was an error. If possible, *try running every bit of ostensibly non-malicious code you find*. There's a reason most literature on R takes advantage of **literate programming** via **code chunks**, so read with *RStudio* open, and experiment with new **expressions** in the R console often. 
+
+<br>
+
+# Review
+
+In the previous session, [Intro to R: Operators](http://rpubs.com/JamisonCrawford/operators), you learned how to use three different types of **operators** in R, as well as how to store values in objects using **assignment**, and how to create **vectors**.
+
+<br>
+
+## Operators
+
+**Arithmetic Operators:** Allow R to perform mathematical computations like an advanced calculator while following the **order of operations** or **operator precedence**, i.e. *"Please excuse my dear aunt Sally"* or *PEMDAS*.
+
+* `()`: Parantheses
+* `^`: Exponents
+* `*`: Multiplication
+* `/`: Division
+* `+`: Addition
+* `-`: Subtraction
+
+<br>
+
+**Relational Operators:** Allow values in R to be compared and contrasted with some specified condition or criteria.
+
+* `>`: Greater than
+* `<`: Less than
+* `>=`: Greater than or equal to
+* `<=`: Less than or equal to
+* `==`: Exactly equal to
+* `!=`: Not equal to
+
+<br>
+
+**Logical Operators:** Allow different conditions or criteria using **relational operators** to be combined.
+
+* `|`: Or, where *only one* operand (side) must be `TRUE` for the expression to be `TRUE`
+* `&`: And, where *both* operands (sides) must be `TRUE` for the expression to be `TRUE`
+
+<br> 
+
+**Logical Values:** You also learned that statements using **relational** and **logical operators** result in **logical values**, that is, either `TRUE` or `FALSE`. Observe:
+
+```{r}
+15 < 20 | 1 > 100
+```
+
+Recall that because of the `|` (or) **operator**, only one operand (side) needs to be `TRUE` for the expression to evaluate to `TRUE`. Even though `1 > 100` is obviously `FALSE`, the entire expression is `TRUE` because `15 < 20` is `TRUE`.
+
+<br>
+
+**Refresher:** Now that we can recall a bit more about **operators**, try to evaluate the following expression in your head.
+
+```{r eval=FALSE}
+(5 * 5 == 25 | 10 != -10) & 200 + 300 > 400
+```
+
+Once you think you know the answer (remember, it's `TRUE` or `FALSE`), run the code in R and find out!
+
+<br>
+
+## Assignment & Objects
+
+**Assignment Operator:** The **assignment operator**, `<-`, allows you to store values, expressions, functions, and entire datasets in an **object**, or a variable which you name, and which may be used in myriad ways.
+
+When you **assign** something to an **object**, the name of the **object** is on the *left side* of the **assignment operator**, or `<-`, while the contents on the *right side* may be one or more values, a dataset, or even an entire expression like the one above.
+
+<br>
+
+**Assigning to Objects:** Here, we'll use `<-` to **assign** the value `10` to the **object**: `october`.
+
+```{r}
+october <- 10
+```
+
+Note that **assigning** information to an **object** does not **print** the object, but it is stored in your **workspace**.
+
+We can print `october` simply by running it in the console.
+
+```{r}
+october
+```
+
+<br>
+
+**Objects in Expressions:** Recall that we can use **objects** interchangeably, as if the were values. Here, we'll subtract `2` from `october` and store the evaluated result in a new **object**: `august`. We'll then call `august` to print its value.
+
+```{r}
+august <- october - 2
+august
+```
+
+<br>
+
+**Refresher:** Finish the following expression by using the **assignment operator**, `<-`, and an **integer** (e.g. 1, 2, etc.) to assign the appropriate value to **object**: `march`.
+
+```{r eval=FALSE}
+march
+```
+
+<br>
+
+## Vectors
+
+**Vectors:** One of the most basic data structures are **vectors**, which contain one or more values *of the same class*. We learned how to make these by combining values using the **function**: `c()`. For example, `c(2, 4, 6)` combines the individual values `2`, `4`, and `6`.
+
+
+<br>
+
+**Storing Vectors:** We learned to store multiple values in a **vector** using the **assignment operator**, `<-`. Let's store `2`, `4`, and `6` into an **object**: `even`.
+
+```{r}
+even <- c(2, 4, 6)
+even
+```
+
+<br>
+
+**Refresher:** Now, create your own **vector** with function `c()`. Fill in the underscore, `_`, with odd **numeric** values. Make the name of the **object**: `odd`.
+
+```{r eval=FALSE}
+odd <- c(_, _, _)
+```
+
+<br>
+
+<center>
+ 
+![*Vectors are similar to linear board game formats like that of "Munchkin". They are one-dimensional, so you only need a single value (or, sometimes, a set of single values) to indicate position. Source: [World of Munchkin](http://www.worldofmunchkin.com/gameboard/)*](munchkin_img.jpg)
+ 
+</center>
+
+<br>
+
+# Data Frames
+
+**Data frames**, sometimes spelled *dataframe* or *data.frame*, are the *most common data structures* in the whole of R. It is made up of **tabular** data, that is, data comprised of *rows* and *columns*. If you've used spreadsheet software like *Excel* before, chances are you're already familiar with the **data frame**, you just didn't know it!
+
+<br>
+
+**Appearance:** What does a **data frame** look like? We can use a built-in dataset to demonstrate. Here, we'll call function `head()` to observe the first few rows of the dataset: `iris`. 
+
+```{r}
+head(iris, 3)
+```
+
+<br>
+
+<center>
+ 
+![*Unlike vectors, data frames are two-dimensional, like chess, Battleship, or Bingo. The values indicating position come in pairs, one to indicate row position and another to indicate column position. Source: [Chess Bazaar](https://www.chessbazaar.com/blog/game-chess-can-make-child-genius-smarter/)*](chess_img.jpg)
+ 
+</center>
+
+<br>
+
+**Content****:** What makes a **data frame** a **data frame**? Besides being tabular, i.e. being made up of two dimensions (*rows* and *colums*), **data frames** contain variables of different **classes**. Let's look at the dataset `iris` again. What one column is different than the others?
+
+```{r}
+head(iris, 3)
+```
+
+<br>
+
+If you recognized that `species` is different from the other columns, you're spot on! We can get a good look at each variable's **class** by calling function `str()`, or *structure*.
+
+```{r}
+str(iris)
+```
+
+As you can see, the first four variables are of class **numeric**: 
+
+* `Sepal.Length`
+* `Sepal.Width`
+* `Petal.Length`
+* `Petal.Width`
+
+However, one sticks out: `Species`. R recognizes this as a **factor**. Don't worry about factors now, except that they are basically *categorical variables* (there are 3 "categories" of iris in `Species`). Only recognize that there are different **classes** mixed together in a **data frame**.
+
+<br>
+
+**Pro Tip****:** To view a **data frame** in its entirety, in *RStudio*, use function `View()` with the name of the **data frame** as the only input, e.g. `View(iris)`. Note the capital "V".
+
+<br>
+
+# Subsetting Variables
+
+**Subsetting** is the act of extracting a **subset**, i.e. pulling out a smaller group of values from a larger group. Suppose we wanted to look at the `mpg` (miles per gallon) of all the cars in the **data frame**: `mtcars`. First, let's look at the first rows of the dataset with `head()`.
+
+```{r}
+head(mtcars)
+```
+
+<br>
+
+**Extracting Entire Variables:** We can **subset** or extract an entire variable and all of its values by using the `$` operator. While this is technically one of a few different, so-called "extraction operators", it's most frequently referred to as the **dollar sign**. Seriously.
+
+You can **subset** or extract an entire variable by combining the following:
+
+* The name of the dataset, e.g. `mtcars`
+* The **dollar sign**, `$`
+* The name of the variable, e.g. `mpg`
+
+Observe:
+
+```{r}
+mtcars$mpg
+```
+
+Wow, it looks a heck of a lot like a **vector**, or a series of values combined with `c()`.
+
+<br>
+
+**Spoiler: It's a Vector.** Yeah. **Data frames** are simply a series of **vectors** of the same length. Recall, vectors are just a series of elements. Therefore:
+
+* You can combine several **vectors** of the same length to make a **data frame**
+* You can dissassemble **data frames** to the **vectors** that comprise them
+
+<br>
+
+**Another Example:** Take the **data frame**, `faithful`, which measures eruption and interim waiting times for the geyser, "Old Faithful", in Yellowstone National Park. Let's take a look at the first few rows with function `head()`.
+
+```{r}
+head(faithful)
+```
+
+<br>
+
+**Practice:** Now, use the **dollar sign** operator, `$`, to extract the waiting times in variable: `waiting`. I'll wait.
+
+```{r eval=FALSE}
+faithful$_
+```
+
+<br>
+
+# Indexing
+
+**Indexing** is essentially **subsetting**, but more precisely and often *by position*. It allows you to extract a specific element or series of elements from either a **vector** or a **data frame**. Instead of the **dollar sign**, or at times in combination with it, you can **index** by using **brackets**, or *bracket notation*, with `[` and `]`.
+
+Take a look at the row names of dataset `mtcars` using function `rownames()`. Note that it is a **vector**.
+
+```{r}
+rownames(mtcars)
+```
+
+<br>
+
+**Indexing by Position:** What if we wanted to extract a specific element (in this case, the name of a car) from this **vector**? Well, we need only:
+
+* Type the name of the **vector**
+* Follow the **vector** name with **brackets**, `[ ]`
+* Specify the position number(s) in the **brackets**
+
+To **index**, or extract, the fourth car, `Hornet 4 Drive`, just do the following:
+
+```{r}
+rownames(mtcars)[4]
+```
+
+<br>
+
+**Indexing in Variables:** We can do precisely the same thing when we **subset** a variable, e.g. `mpg` in `mtcars`. Noteably, *because they are in the same position*, this gives you the `mpg` of the `Hornet 4 Drive`!
+
+```{r}
+mtcars$mpg[4]
+```
+
+<br>
+
+**Takeaway:** A **vector** is a 1-dimensional data structure, meaning it's simply a series or sequence of values.
+
+*When you're already on the corner of 5th Avenue and East 23rd Street, checking out the Flat Iron Building, and you ask a local how to get to 5th Avenue and East 26th Street (you know, to check out the Museum of Mathematics), you're on the right avenue already, so you only need to know how many blocks to walk.*
+
+**It's the same with vectors. You just need to know the number of blocks to get to your destination.**
+
+<br>
+
+**Indexing in Data Frames:** Now we're talking about 2-dimensional data, i.e. *tabular data*, i.e. data with *rows* and *columns*. We still use **brackets** to **index** *by position*. However, because **data frames** are 2-dimensional, we need 2 numbers.
+
+To **index** a specific value in a **data frame**, you need only:
+
+* Type the name of the **data frame**
+* Follow the name with **brackets**, or `[` and `]`
+* Use two numbers, the *row position* and the *column position* (in that order)
+* Separate with a comma, or `,`
+
+<br>
+
+Let's try it to extract the `mpg` for the `Hornet 4 Drive` from the `mtcars` dataset. We know that the care is in the 4th row and `mpg` is the 1st column, so we need `1` and `4`. Observe:
+
+```{r}
+mtcars[4, 1]
+```
+
+<br>
+
+**Extracting All Row or All Column Values:** We can **index** an exact value by specifying the *row* and *column position*. However, you can also:
+
+* Extract all *row* values by leaving the *row position* blank, e.g. `mtcars[, 1]`
+* Extract all *column* values by leaving the *column position* blank, e.g. `mtcars[4, ]`
+
+Let's see that in action by extracting all values in variable `mpg` (the whole column!). 
+Then we'll extract all the values in observation `Hornet 4 Drive` (the whole row!).
+
+```{r}
+mtcars[, 1]
+mtcars[4, ]
+```
+
+<br>
+
+**Takeaway:** A **data frame** is a 2-dimensional data structure, and therefore requires two numbers to indicate position.
+
+*Suppose we're enjoying the National Museum of Mathematics on 5th Avenue and East 26th Street, but we're going to be late for a show at Madison Square Garden on 8th Avenue and West 31st Street. We'll need to go 5 blocks towards Upper Manhattan, and 4 blocks west (accounting for Broadway, of course).*
+
+**We navigate data frames in the same way.**
+
+<br>
+
+# Advanced Indexing
+
+You can use other operators and functions to **index** to subset a range of values within both **vectors** and **data frames**. Let's see what that looks like using the `mtcars` dataset.
+
+<br>
+
+## Indexing Two or More Positions
+
+You can create a **vector** of element positions using the concatenate, or `c()` function. Suppose you want to subset the first, fifth, and eleventh cars in the dataset. You simply need to plug those values into function `c()`, i.e. `c(1, 5, 11)`.
+
+Recall that in a **data frame**, you include:
+
+* The name of the data frame
+* Brackets (`[` & `]`)
+* The row position
+* A comma (`,`)
+* The column position
+
+<br>
+
+Now, let's call the `mtcars` dataset and index positions 1, 5, and 11 using the concatenate function, `c()`. Note that we leave the column position (to the right of the comma) blank. *By not specifying a position, all positions' values are returned.*
+
+```{r}
+mtcars[c(1, 5, 11), ]
+```
+
+<br>
+
+We can even subset specific rows and columns by concatenating position values using function `c()` in the column position, i.e. to the right of the comma in brackets. Here's rows 1, 5, and 11, along with *only* columns 1 (`mpg`) and 6 (`wt`, or weight):
+
+```{r}
+mtcars[c(1, 5, 11), c(1, 6)]
+```
+
+<br>
+
+**Pro Tip****:** For both rows and columns, *if they have names*, you can **index** by name using quotation marks, e.g. `"mpg"`. Let's look at the mileage, `mpg`, and number of cylinders, `cyl`, for the "Honda Civic". Recall that we still must use function `c()` for more than one value:
+
+```{r}
+mtcars["Honda Civic", c("mpg", "cyl")]
+```
+
+Cool, yeah?
+
+<br>
+
+**Practice:** Use one command to extract the cylinders ('cyl', column 2), horsepower (`hp`, column 4), and weight (`wt`, column 6) for the "Camaro Z28" and "Maserati Bora", in rows 24 and 31, respectively. Which has more horsepower (`hp`)? 
+ 
+You can use either position or name, but remember to use quotation marks for each name!
+
+```{r eval=FALSE}
+mtcars[c(_, _), c(_, _, _)]
+```
+
+<br>
+
+## Indexing Position Ranges
+
+Suppose that instead of listing a series of position numbers, we'd like to provide a range or **sequence**. We can do this with a simple operator, the **colon operator** or `:`. For example, if we want rows 3, 4, 5, and 6, we simply type `3:6`, without any use of the concatenate function, `c()`!
+
+```{r}
+mtcars[3:6, ]
+```
+
+<br>
+
+What's more, you can combine ranges with individual positions using function `c()`, for example:
+
+```{r}
+mtcars[c(3:6, 8, 12), ]
+```
+
+<br>
+
+**Pro Tip****:** Recall that any numerical values can me made into a sequence. Take the following, `c(1, 5, 10, 20, 100)`. We can determine the **length** of this vector by using function `length()`. Remember, we use length because vectors are one-dimensional, the same way we measure height and weight, e.g.
+
+```{r}
+length(c(1, 5, 10, 20, 100))
+```
+
+Why `5`? Because the **length** of the vector is `5`, that is, it contains 5 elements. We can make a sequence for each position number, i.e. 1 through 5, by using the **colon operator**, or `:`. 
+
+```{r}
+1:length(c(1, 5, 10, 20, 100))
+```
+
+Know this: *You can make **sequences** from any numbers*.
+
+<br>
+
+**Practice:** Using the **colon operator**, finish the following command in R to print the first 5 values of `mpg` in `mtcars`.
+
+```{r eval=FALSE}
+mtcars[_ _ _, "mpg"]
+```
+
+<br>
+
+## Storing Indices
+
+Since we can store information in R using **assignment** (`<-`) and an **object**, it's helpful to store our indices or position values within them. This is especially true if we have large datasets and many, many positions. Here, we simply use a combination of `c()` and `:`, if necessary, to store position values. Like above, we'll store `3:6`, `8`, and `12`.
+
+```{r}
+index <- c(3:6, 8, 12)
+```
+
+<br>
+
+Where does this get us? Well, instead of having messy code with a bunch of operators and digits, we can simply use **object** `index` to indicate row position. It looks like this:
+
+```{r}
+mtcars[index, ]
+```
+
+This has huge implications!
+
+<br>
+
+**Practice****:** Save a new **object**, `new_index`, by storing the values 3, 5, and 11 through 14. Make sure you use the concatenate function, `c()`:
+
+```{r eval=FALSE}
+new_index <- c(_)
+```
+
+Now, use object `new_index` in the row position inside the brackets of `mtcars`.
+
+```{r eval=FALSE}
+mtcars[_, ]
+```
+
+**Bonus Challenge****:** Save your output to a new object, `my_cars`, and use function `mean()` to determine the average weight (`wt`) of the above subset. Remember that you can subset a specific variable, like `mpg` or `wt`, by typing the dataset name, `mtcars`, using the **dollar sign operator**, `$`, along with the variable name. 
+
+<br>
+
+## Conditional Subsetting
+
+We learned in [Introduction to R: Operators](http://rpubs.com/JamisonCrawford/operators) that we can use **relational** and **logical operators** like "greater than" (`>`), "less than" (`<`), and "equal to" (`==`) to determine which values in a dataset meet some condition we've specified. These statements return **logical** values, i.e. `TRUE` and/or `FALSE`. We can actually turn those statements into criteria to perform **filtering** operations.
+
+Let's create an index of **logical** values, `TRUE` and `FALSE`, to describe whether a vehicle in `mtcars` gets good gas mileage, with an `mpg `value of greater than 20.
+
+```{r}
+mtcars$mpg > 20
+```
+
+Just looking at a sequence of `TRUE` and `FALSE` values isn't very helpful, so what can we do with them? Let's save them in an **object** using the **assignment operator** (`<-`). We'll call the object: `mpg_index`.
+
+```{r}
+mpg_index <- mtcars$mpg > 20
+```
+
+Assigning it to an object doesn't change anything, it's still a series of **logical ** values, with the first values seen here:
+
+```{r}
+head(mpg_index)
+```
+
+<br>
+
+**Filtering Operations:** In this case, every `TRUE` and `FALSE` value corresponds to a row. `TRUE` values are those values that satisfied our condition, `mpg > 20`. Like we did with `index` and `new_index`, above, we can filter the dataset by using `mpg_index` in place of a position or collection of positions. Since we're working with rows, `mpg_index` nests to the left of the comma (`,`).
+
+```{r}
+mtcars[mpg_index, ]
+```
+
+Bob's your uncle! You performed a filtering operation. These can be quite complex and they certainly are not uncommon!
+
+<br>
+
+**Determining Position Values:** It would be more useful if, rather than a list of `TRUE` and `FALSE` **logicals**, we were able to get our hands on the numeric value of the position. This is easily achieved using the `which()` function. When called, `which()` prints the numeric values of every `TRUE` in a sequence of **logical** values.
+
+Observe:
+
+```{r}
+which(mpg_index)
+```
+
+Here, we can determine precisely which rows satisfy our condition, `mpg > 20`. It prints out in a vector, which one could index further if one were so inclined. For example, let's extract the 5th element and save it as object `multi_pass`.
+
+```{r}
+multi_pass <- which(mpg_index)[5]
+```
+
+We can simply use object `multi_pass` as a more refined index on which to subset:
+
+```{r}
+mtcars[multi_pass, ]
+```
+
+Chicken. Good.
+
+<br>
+
+**How Many Are True?:** Recall that, under the hood, every `TRUE` is equal to `1`, while every `FALSE` is equal to `0`. Let's prove that with some quick logic:
+
+```{r}
+TRUE == 1
+FALSE == 0
+```
+
+Therefore, we can quantify just how many cars in our subset satisfy the condition, `mpg > 20`, since they are represented by a `TRUE`. This is performed with the `sum()` function. Observe:
+
+```{r}
+sum(mpg_index)
+```
+
+Fourteen cars, neat! That's less than half the total cars (*n = 32*). This practice is more useful than may initially meet the eye.
+
+<br>
+
+**Practice****:** Here's the scenario. It's 1972 and due to a mysterious benefactor, you can get any car you want. Let's create some criteria by which to filter. 
+
+* We'll want to be somewhat (somewhat!) fuel efficient, so `mpg` should be greater than `15`.
+* We should get something with greater than or equal to `150` horsepower, or `hp`, because we're insecure (recall the **and operator**, i.e. `&`).
+* We want something with either `6` or `8` cylinders, or `cyl` (recall the **or operator**, i.e. `|`).
+
+Save your criteria in an object: `ideal_cars`. Use function `View()` to check it out, i.e. `View(ideal_cars)`. Which will you choose?
+
+<br>
+
+# Applied Practice
+
+**Instructions:** Run the following code to read in data on [Syracuse Housing Code Violations](http://data.syrgov.net/datasets/code-violations?geometry=-76.866%2C42.947%2C-75.707%2C43.123) from [DataCuse](http://data.syrgov.net/). They're stored in the object: `viola`.
+
+```{r message = FALSE}
+library(readr)
+url <- "https://tinyurl.com/ybq2anh2"
+viola <- read_csv(url)
+```
+
+The following instructions guide you through some methods of how to go about multi-step filtering operations. 
+
+<br>
+
+## Exploratory Analysis
+
+1. First, we'll want to get to know our data. It's very helpful that we have [documentation](http://data.syrgov.net/datasets/code-violations?geometry=-76.866%2C42.947%2C-75.707%2C43.123), but that's not always the case. Use function `dim()` to determine the number of rows and columns in the dataset, respectively.
+
+```{r}
+dim(viola)
+```
+
+`13,896` rows and `24` columns, so a relatively small dataset. However, we'll want to condsider **dimension reduction** techniques to eliminate unwanted variables.
+
+<br>
+
+2. Second, we can look at some variable names to get an idea of what we might want to include or exclude. We can use functions `names()` or `colnames()` and input the dataset.
+
+```{r}
+names(viola)
+```
+
+Since we're not mapping any data (today!), we may want to consider eliminating `long` and `lat`, or longitude and latitude coordinates. Say we're not interested in neighborhood boundaries, only `property_zip` - what else might we remove from location-related variables?
+
+<br>
+
+3. Suppose we'd like to know the class of each variable and the first few values in each. We can use `str()` to examine the structure.
+
+```{r}
+str(viola, max.level = 1)
+```
+
+This is likely the most useful base R function for **eploratory data analysis**, providing dimensions, variable names and classes, the object class for storing the data, and the first few observations. It's a combination of functions `dim()`, `names()`, `class()`, and `head()`.
+
+4. Since we're interested in `property_zip`, it would be helpful to know the distribution of violations by zip code. Let's use function `table()` to determine the number of records for each zip code. Remember to subset variables with `$`:
+
+```{r}
+table(viola$property_zip)
+```
+
+<br>
+
+## Exploratory Data Visualization
+
+There's not much in the way of numeric data, but that doesn't mean we can't try to visualize some variables of interest. 
+
+1. We'll use very basic plotting functions from the base R "graphics" package, which is built into R. First, let's visualize that distribution we produced with function `table()` and see where the most violations occur.
+
+```{r}
+zip_table <- table(viola$property_zip)
+barplot(zip_table, col = "tomato")
+```
+
+2. Before we get rid of them, let's take a look at the concentration of violations using `long`, or longitude, and `lat`, or latitude, for each. We'll use the scatter plot function, `plot()`, from base R, setting `x =` to `long` and `y =` to `lat`. Note that a geospatial visualization is often just a scatter plot with a useful background.
+
+```{r}
+plot(x = viola$long, y = viola$lat)
+```
+
+If you squint your eyes, it kind of looks like Syracuse!
+
+## Filtering
+
+Now it's your turn. We've done some quick and dirty **Exploratory Data Analysis**, and let's imagine we drew conclusions from that to warrant the following filters for downstream analysis. We're in the **pre-processing** or **processing stage** of a data analysis, now. Mess up here, and everything downstream will suffer the effects, as well. No pressure.
+
+1. **Dimension Reduction:** We can get rid of a few variables ("dimensions") that we won't be using for our filtering. It would save us time, instead, to specify what we'd like to keep, rather than what we want to remove. Therefore, create a filter for `property_address`, `property_zip`, `violation_date`, `violation_status`, `case_type`, and `property_owner_name`. These are columns 3, 4, 7, 9, 11, and 13. Filter by preserving only these columns, using function `c()`. Store your filtered data in a new object: `viola2`.
+
+2. **Narrowing Geography:** Suppose we're only interest in `property_zip` exactly equal to `13206`. Instead of columns, like above, create a conditioning filter using `==` to preserve only properties in `13206`. First, we need to clean the zip codes a little bit by running the following code. Store the results in object: `viola3`.
+
+```{r eval=FALSE}
+viola2$property_zip <- gsub(x = viola2$property_zip, pattern = "\"", replacement = "")
+```
+
+Remember to use a conditional statement to detect "exactly equals", or `==`.
+
+3. **Relevant Status:** Let's eliminate irrelevant cases, i.e. `violation_status` with the value `Closed` should be eliminated. You can use `!=` ("does not equal") or `==` ("exactly equal to") depending on how you'd like to tackle it! Store the resulting data in object: `viola4`.
+
+4. **Relevant Dates**: Run the following code to convert the year 2018 into a filtering object: `date_cutoff`. Then, use a filtering operation, filter `violation_date` to *greater than or equal to* `date_cutoff`. This preserves only data from 2018. Store the results in object: `viola5`. 
+
+```{r}
+date_cutoff <- as.POSIXlt("2018-01-01")
+```
+
+5. **Violation of Interest:** Your colleagues are expecting the preprocessed data to only contain `case_type` exactly equal to `Vacant House`. Perform a filtering operation and store your variables in object: `viola6`.
+
+<br>
+
+**Congratulations:** You've completed some important data preprocessing for your team using your new skills. Run the following code to see what your team has made to represent the top 10 property owners with the greatest amount of open violations for vacant houses in 2018, and only in zip code 13206!
+
+```{r eval=FALSE, message=FALSE}
+if(!require(dplyr)){install.packages("dplyr")}; library(dplyr)
+if(!require(ggplot2)){install.packages("ggplot2")}; library(ggplot2)
+
+viola7 <- as_data_frame(table(viola6$property_owner_name)) %>% 
+  arrange(desc(n)) %>% rename(Name = Var1, Violations = n); viola8 <- viola7[1:10,]
+viola8$Name <- factor(viola8$Name, levels = viola8$Name[order(-viola8$Violations)])
+
+ggplot(viola8, aes(x = Name, y = Violations)) + 
+  geom_bar(stat = "identity", fill = "skyblue") +
+  theme_classic() +
+  theme(axis.text.x=element_text(angle = -45, hjust = 0)) +
+  ggtitle(label = "Top 10 property owners with vacant housing violations", 
+          subtitle = "Open violations in 13206 since January 1, 2018")
+```
+
+<br>
+
+# Fin
+
+**This quote didn't fit anywhere, and it might confuse more than motivates, but I found it relevant.**
+
+"You start from the nitty-gritty programming types of aspects. We talk about operators and we talk about data types and we talk about classes and control structures and you work your way up to analyzing or reading in a dataset. It's usually like the third or fourth lecture that I'm reading in data... It occurred to me that regardless of how you try to start teaching R, you always ended up doing that kind of crap because, like, you had to. Imagine no Tidyverse: If you wanted to take the mean of a variable within groups of another variable, that is a straight up 'group_by()' %>% 'summarize()' operation. But if you wanted to do that just in base R, you can use the 'aggregate()' function or the 'tapply()' function, but in order to do that you'd have to subset the column you wanted to group by from the data.frame. But how do you subset out the column? Well you have to use the 'dollar sign operator' to subset out the column - but then, but what's that, right? And then you've already fallen down this deep hole... If you wanted to subset rows, you'd have to use the 'bracket operator', but what's that? What's one bracket versus two brackets? It's like you always ended up falling down this hole of operators and data types. 
+
+There was no way to abstract out those low-level details. And I think the Tidyverse does almost all of that. You still have to know what a logical operation is because that's how you filter things, but you can know it at a higher level. But there's no way to work with data in base R without understanding operators and data types, basically... So you kind of ended up teaching that anyway... So you kind of get that stuff out of the way and let [students] see it at least once, and later on when you get caught in that net of analyzing data... you say 'Oh, we saw factors before and so let's have a review'." 
+
+**Roger Peng, PhD., Bloomberg School of Public Health, Johns Hopkins University**
+ 
+*"Analogy Corner". Not So Standard Deviations, Episode 43. 20 June 2017.*

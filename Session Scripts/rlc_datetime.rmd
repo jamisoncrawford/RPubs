@@ -1,0 +1,465 @@
+---
+title: 'Intro to R: Dates & Times'
+author: "Jamison R. Crawford, MPA"
+date: "December 21, 2018"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 4
+    number_sections: true
+---
+
+```{r setup, cache=FALSE, echo=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(error = TRUE)
+```
+
+**Latest Versions & Updates:** This markdown document was built using the following versions of *R* and *RStudio*:
+ 
+* R v. 3.5.1
+* RStudio v. 1.1.456
+* Document v. 1.0
+* Last Updated: 2018-12-20
+
+# Review: Text Data
+
+The following reviews some imporant concepts for working with text data, as seen in [Intro to R: Text Data](http://rpubs.com/JamisonCrawford/text):
+
+**Classes:** Most variables are of a particular **class**, e.g. "numeric", "integer", "character", "logical", etc.
+
+* Determine the class of a single variable using function `class()`
+* Determine multiple variable classes using function `str()` on a data frame
+* Confirm class via `TRUE` or `FALSE` with `is.*()` functions, e.g. `is.logical()`
+* Coerce variables to a different class with `as.*()` functins, e.g. `as.character()`
+
+**Character & Factor Classes:** The most common types of qualitative variables are of class **character** and **factor**.
+
+* Character data are comprised of sequences of characters wrapped in quotes (`""`)
+* Factors are defined explicitly as categorical, nominal, or discrete variables (all synonymous)
+* Coerce variables to class "character" using `as.character()`, confirm with `is.character()`
+* Coerce variables to class "factor" using `as.factor()`, confirm with `is.factor()`
+* Create new factor variables using function `factor()`
+* Factors are critical in visualizing and modeling data, and their categories are known as **levels**
+* Factors may be ordinal (ordered), made possible with the `levels =` argument or `levels()` function
+
+**Fundamentals of Text:** There are several easy-to-use Base R functions for "character" data.
+
+* Combine strings of text with function `paste()` and specify delimiting characters with argument `sep =`
+* Coerce and format numeric data with functions `format()` and `formatC()`
+    * Package `scales` has additional formatting options, e.g. `dollar()`
+* Print "character" data without quotes or position identifiers using function `writeLines()`
+    * Print the same unquoted data with position identifiers using function `noquote()`
+
+**Package "stringr" Functions:** The "stringr" package has an intuitive, unified framework common to the *Tidyverse*.
+
+* Many critical "stringr" functions have a Base R counterpart but are easier to use
+* Paste strings of text together using `str_c()`
+* Determine the number of characters in a string using `str_length()`
+* Extract substrings using `str_sub()`
+* Return `TRUE` and `FALSE` values for pattern matches with `str_detect()`
+* Return original values using `str_subset()`
+* Return the frequency of pattern matches using `str_count()`
+* Split strings into substrings with a specified delimiter using `str_split()`
+* Find and replace specified patterns using `str_replace()` and `str_replace_all()`
+* Trim whitespace on either or both sides of values using `str_trim()`
+* "Pad" values with specified characters, e.g. leading zeroes, using `str_pad()`
+
+<br>
+
+# Dates & Times in R
+
+**Overview:** We can easily create strings of text to represent dates and times.
+
+* The character string "12/21/2018" may be human-readable, but not machine-readable
+* One must coerce the class of these strings to be recognizable by R as dates or times
+* Class **"POSIX"** (Portable Operating System Interface for Unix) is specifically for dates and datetimes
+* Under the hood, class "POSIX" variables are stored as numbers, but format to be human-readable
+    * These numbers represent either various numbers in date units or total seconds since Thursday, January 1, 1970
+    * If a positive number, the date/datetime is *after* January 1, 1970
+    * If a negative number, the date/datetime is *before* January 1, 1970
+    * Seemingly arbitrary, this date actually derives from "Unix Time", a.k.a. ["The Epoch"](https://en.wikipedia.org/wiki/Unix_time)
+
+<br>
+
+## Class "POSIXlt" & "POSIXct"
+
+**POSIXlt** stores datetimes in days, months, years, hours, minutes, and seconds relative to January 1, 1970.
+
+Here, we'll use the current date and time using function `Sys.time()`:
+
+```{r}
+Sys.time()
+my_date_lt <- as.POSIXlt(Sys.time())
+unclass(my_date_lt)
+```
+
+<br>
+
+**POSIXct** only stores datetimes in seconds relative to January 1, 1970.
+
+```{r}
+Sys.time()
+my_date_ct <- as.POSIXct(Sys.time())
+unclass(my_date_ct)
+```
+
+<br>
+
+### Formatting "POSIXlt" & "POSIXct"
+
+"POSIXlt" values may be formatted in a variety of ways, e.g.:
+
+* "December 21, 2018"
+* "21 December 2018"
+* "2018-12-21"
+* "12/21/18"
+* "12-21-2018"
+
+<br>
+
+**Coercing to "POSIXlt":** We can coerce variables to "POSIXlt" class using function `as.POSIXlt()`, e.g.:
+
+```{r}
+my_date <- "2018-12-21"
+print(my_date)
+class(my_date)
+
+my_date <- as.POSIXlt("2018-12-21")
+print(my_date)
+class(my_date)
+```
+
+<br>
+
+**Standardized Formats:** Of these ways, the preferable and standard formatting is "YYYY-MM-DD", e.g. "2018-12-21". Why?
+
+```{r}
+my_dates <- c("October 01, 2018", "December 01, 2019", "November 01, 2018", "September 01, 2019")
+print(my_dates)
+
+sort(my_dates)
+```
+
+Note that without converting to class "POSIXlt", these dates are arranged **naively** in alphabetical order.
+
+<br>
+
+**Another Example:** Here, we only use numbers to identify dates. Observe:
+
+```{r}
+my_dates <- c("10/01/18", "12/01/19", "11/01/18", "09/01/19")
+print(my_dates)
+
+sort(my_dates)
+```
+
+These are also arranged **naively**, and incorrectly, in numerical order (note that 2019 comes both before and after 2018).
+
+<br>
+
+**Standard Formatting in Action:** Here we can see how the standard format is impossible to disarrange:
+
+```{r}
+my_dates <- c("2018-10-01", "2019-12-01", "2018-11-01", "2019-09-01")
+print(my_dates)
+
+sort(my_dates)
+```
+
+Even if arranged **naively** and not coerced to "POSIXlt" class, these dates will invariably sort correctly.
+
+* This is because the units of measurement have a hierarchy of unit magnitude
+* Hence why much of the rest of the world formats dates as, e.g. "21 December 2018"
+    * Despite the opposite direction, these follow a hierarchy of unit magnitude
+    * It's like the metric system in that it *actually makes sense*
+
+<br>
+
+**Formatting in Base R:** It's not a bad idea to know how this is done, but it's a pain in the rear.
+
+* Therefore, we'll learn how to format dates using the *Tidyverse* package `lubridate`
+* In Base R, you have to manually identify the elements of non-standard dates to properly parse them:
+    * `%Y` is a 4-digit year
+    * `%y` is a 2-digit year
+    * `%m` is a 2-digit month
+    * `%d` is a 2-digit day of the month
+    * `%A` is the weekday, e.g. "Wednesday"
+    * `%B` is the month, e.g. "February"
+    * `%b` is the abbreviated month, e.g. "Feb"
+* What's more, in Base R, you have to manually identify elements of non-standard timestamps:
+    * `%H` is hours as a decimal number
+    * `%I` is hours in AM/PM format as a decimal number
+    * `%M` is minutes as a decimal number
+    * `%S` is seconds as a decimal number
+    * `%T` is shorthand for standard format: %H:%M:%S
+    * `%p` is the AM/PM indicator
+    
+The standard format for timestamps are "HH:MM:SS", i.e. hours, minutes, and seconds.
+
+* The same logic applies: Decreasing order of units of magnitude
+* Therefore, datetime objects are standardized as "YYYY-MM-DD HH:MM:SS"
+
+<br>
+
+## Package "lubridate"
+
+**Package** `lubridate` allows us to easily parse just about any date with simple, intuitive functions:
+
+<br>
+
+### Ways of Old
+
+**Formatting datetimes**, as mentioned, is a huge pain. Here, we'll try to format `12/20/18`
+
+```{r}
+my_datetime <- "12/21/18 08:30:00 AM"
+print(my_datetime)
+
+as.POSIXlt(my_datetime)
+```
+
+Here, we get an error, since the input data isn't in "standard unambiguous format". To format in Base R:
+
+<br>
+
+**Formatting in Base R**, we have to manually format our datetimes, since they aren't "standard unambiguous" format.
+
+* In other words, we have to tell R exactly how the date and time are formatted
+
+```{r}
+my_datetime <- "12/21/18 08:30:00 AM"
+print(my_datetime)
+
+as.POSIXlt(x = my_datetime, 
+           format = "%m/%d/%y %H:%M:%S %p")
+```
+
+<br>
+
+### Making Things Easier
+
+**Package** `lubridate` is able to detect dates and times in "unambiguous" format with very little specification.
+
+First, let's install and load `lubridate`:
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+if(!require(lubridate)){install.packages("lubridate")}
+library(lubridate)
+```
+
+<br>
+
+**Formatting the Lubridate Way:** We'll take the same datetime and format it with function `mdy_hms()`.
+
+```{r}
+my_datetime <- "12/21/18 08:30:00 AM"
+print(my_datetime)
+
+mdy_hms(my_datetime)
+```
+
+Way, way, way easier! By using `mdy_hms()`, we told R that the format approximates "MM-DD-YYYY HH:MM:SS".
+
+<br>
+
+**Other Formats:** We can do this with a variety of datetime formats. Behold:
+
+```{r}
+my_datetime <- "12/21/2018 08:30:00 AM"
+mdy_hms(my_datetime)
+
+my_datetime <- "December 21, 2018 8:30:00"
+mdy_hms(my_datetime)
+
+my_datetime <-  "12/21/18 8:30:00"
+mdy_hms(my_datetime)
+
+my_datetime <- "Dec. 21, 2018 8:30:00"
+mdy_hms(my_datetime)
+
+my_datetime <- "Dec 21 18 8:30:00"
+mdy_hms(my_datetime)
+
+my_datetime <- "122118 083000"
+mdy_hms(my_datetime)
+```
+
+We can get increasingly lazy with our dates, but `lubridate` gets the job done without fail.
+
+<br>
+
+**Similar Functions:** Other `lubridate` functions for formatting non-standard, unambiguous datetimes include:
+
+* `mdy_hm()`
+* `mdy_h()`
+* `mdy()`
+* `dmy_hms()`
+* `dmy_hm()`
+* `dmy_h()`
+* `dmy`
+* `ydm_hms()`
+* `ydm_hm()`
+* `ydm_h()`
+* `ydm()`
+* `ymd_hms()`
+* `ymd_hm()`
+* `ymd_h()`
+* `ymd()`
+
+Just remember: 
+
+* `y` is "year"
+* `m` is "month"
+* `d` is "day"
+* `h` is "hour"
+* `m` is "minute"
+* `s` is "second"
+
+And you're good to go!
+
+<br>
+
+### Other Cool Functions
+
+**Package** `lubridate` is replete with date-, time-, and datetime-related functions. Here's a few cool ones:
+
+<br>
+
+**Dates:** `date()` and `as_date()` are less intimidating and more human-readable ways to create class `POSIX` variables.
+
+* Enter a new class, class **"Date"**, but this is the exact same thing as a "POSIClt" variable
+
+```{r}
+my_date <- "2018-12-21"
+class(my_date)
+
+my_date <- as_date(my_date)
+class(my_date)
+```
+
+<br>
+
+**Extracting Units of Time:** You can extract a unit of time from a datetime object, including:
+
+* `year()`
+* `month()`
+* `week()`
+* `day()`
+* `weekdays()`
+* `hour()`
+* `minute()`
+* `second()`
+* `am()`
+* `pm()`
+
+Observe:
+
+```{r}
+my_datetime <- mdy_hms("December 21, 2018 08:30:00 AM")
+year(my_datetime)
+month(my_datetime)
+week(my_datetime)
+day(my_datetime)
+weekdays(my_datetime)
+hour(my_datetime)
+minute(my_datetime)
+second(my_datetime)
+am(my_datetime)
+pm(my_datetime)
+```
+
+<br>
+
+**Timestamping:** Print current date and time with `now()`, similar to `Sys.time()` but easier:
+
+```{r}
+now()
+```
+
+<br>
+
+**Determine Differences in Times:** Find time and date differences using simple arithmetic:
+
+```{r eval = FALSE}
+session_start <- mdy_hms("December 21, 2018 08:30:00 AM")
+current_time <- now()
+
+session_start - current_time
+```
+
+<br>
+
+**Determine Difference in Dates:** Again, since dates and times are numbers under the hood, it's arithmetic!
+
+```{r}
+birthday <- mdy("August 10, 1989")
+age <- today() - birthday
+
+print(age)
+class(age)
+```
+
+Storing this creates a new variable class: **"difftime"**.
+
+* Class "difftime" objects may be converted to different units using Base R function `difftime()`
+
+<br>
+
+**Round Dates:** You can make dates uniform using `round_date()`, `floor_date()`, and `ceiling_date()`.
+
+* You must specify the unit of time to which each function rounds
+* Particularly useful for, e.g., grouping number of crimes by month
+
+```{r}
+crimes <- data.frame(crime = c("Larceny", "Larceny", "Arson"),
+                     date = c("2018-04-03", "2018-04-19", "2018-05-11"))
+crimes$date <- ymd(crimes$date)
+print(crimes)
+
+crimes$date <- floor_date(x = crimes$date, unit = "month")
+print(crimes)
+```
+
+<br>
+
+# Applied Practice
+
+**Instructions:** Run the following code to read in housing code violation data from *Syracuse Open Data*.
+
+* If you'd like, check out the documentation [here](http://data.syrgov.net/datasets/code-violations)
+* The dataframe will be made available in your local environment: `violations`
+
+```{r warning=FALSE, message=FALSE}
+if(!require(readr)){install.packages("readr")}; library(readr)
+
+url <- "https://opendata.arcgis.com/datasets/fb7233117df1443081541f220327f178_0.csv"
+types <- "--c---T---c---c---------"
+violations <- read_csv(file = url, col_types = types)
+```
+
+<br>
+
+**Challenge 1:** Determine the class of variable `violation_date`. Convert it to class "Date".
+
+<br>
+
+**Challenge 2:** When was the earliest violation in `violations`? The latest?
+
+* Hint: Consider using functions `min()` and `max()`
+
+<br>
+
+**Challenge 3:** What is the duration between the earliest and latest violation in `violations`?
+
+<br>
+
+**Challenge 4:** How long ago was the most recent violation as of today?
+
+* Hint: Consider using functions `now()`, `max()`, and basic arithmetic
+
+<br>
+
+**Challenge 5:** Which month had the most reported violations according to the data?
+
+* Hint #1: Consider using `floor_date()` to make instances uniform
+* Hint #2: Consider using `table()`, only inputting the dataset and variable name with `$` notation

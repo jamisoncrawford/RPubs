@@ -1,0 +1,969 @@
+---
+title: 'Intro to R: Data Manipulation'
+author: "Jamison R. Crawford, MPA"
+date: "January 31, 2019"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 4
+    number_sections: true
+---
+
+# Version Notes
+
+**Latest Versions & Updates:** This markdown document was built using the following versions of *R* and *RStudio*:
+ 
+* R v. 3.5.1
+* RStudio v. 1.1.456
+* Document v. 2.0
+* Created: 2019-01-03
+* Updated: 2019-01-17
+  - Added packages `dplyr`, `tidyr` functions 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+if(!require(kableExtra)){install.packages("kableExtra")}
+library(kableExtra)
+```
+
+# Review: Dates & Times
+
+**Standard, Unambiguous Format:** Dates are best stored in "YYYY-MM-DD" format.
+
+* This is especially true if dates are ordered naively, e.g. alphabetically
+
+<br>
+
+<center>
+
+
+```{r datetime_comic, cache=TRUE, echo=FALSE, fig.cap="*The right way versus alternatives. Source: [XKCD](https://xkcd.com/1179/)*", out.width = '60%'}
+
+knitr::include_graphics("https://imgs.xkcd.com/comics/iso_8601.png")
+
+```
+
+</center>
+
+<br>
+
+**The Epoch**: 12:00 AM, January 1, 1970 is the time by which all time-related objects are compared and stored.
+
+* Times preceding 1970-01-01 may be stored as negative numbers
+* Times following 1970-01-01 may be stored as positive numbers
+
+<br>
+
+**Datetime Classes:** Time-related variables may be one of several classes:
+
+* **POSIXlt:** Stores datetimes as components parts, e.g. days, months, hours, and minutes
+* **POSIXct:** Stores datetimes as total seconds relative to 1970-01-01
+* **Date:** Stores datetimes as total days relative to 1970-01-01
+* **Difftime:** Stores intervals of time between date and datetime objects
+
+<br>
+
+**Package "Lubridate"**: A unified, easy-to-use package for working with dates and times in R.
+
+```{r, message=FALSE}
+if(!require(lubridate)){install.packages("lubridate")}
+library(lubridate)
+```
+
+<br>
+
+**Formatting in "Lubridate":** Lubridate's functions make it easy to format dates and times.
+
+* Use functions specifying day, month, year, etc. for easy conversion, e.g. `mdy()` for "Aug. 10, 1989"
+* Recall that `y` is "year", `m` is "month", `d` is "day", `h` is "hour", etc.
+
+<br>
+
+**Extracting Time Components:** Extract individual time components, e.g. weekdays, months, etc.
+
+* Function `year()`, `month()`, and `day()`, e.g., extract year, month, and day, respectively
+
+<br>
+
+**Rounding Dates:** Date rounding lets you round to the nearest, minimum, or maximum unit of time.
+
+* Function `round_date()` rounds to the nearest unit specified
+* Function `floor_date()` rounds to the minimum possible value of the unit specified
+* Function `ceiling_date()` rounds to the maximum possible value of the unit specified
+
+<br>
+
+# Data Manipulation
+
+> "I think you can have a ridiculously enormous and complex data set, but if you have the right tools and methodology then it's not a problem." (Aaron Koblin)
+
+**What is data manipulation?:** Basically, the process of organizing data per your needs.
+
+<br>
+
+## On Package "dplyr"
+
+**A grammar for data manipulation:** Package "dplyr" purports to use a form of manipulation-related grammer.
+
+* Similar to Leland Wilkinson's *The Grammar of Graphics*, the underpinnings of package "ggplot2"
+* Fundamentally important package for the Tidyverse's myriad libraries and extensions
+* Informally, "dplyr" functions are referred to as "verbs"
+* Focuses on 5 key "verbs" and lesser "helper functions"
+* Coded in C++, so extremely fast compared to base R
+* Design for data frames; matrices are out of luck
+
+<br>
+
+## Installing "dplyr"
+
+**Run the Following:** This code detects if "dplyr" is present, installing if not, and loads the "dplyr" package.
+
+```{r message=FALSE}
+if(!require(dplyr)){install.packages("dplyr")}
+library(dplyr)
+```
+
+<br>
+
+## On Tibbles
+
+**Tibbles:** Special kinds of data frames used in "dplyr" and other Tidyverse packages.
+
+* These data structures are made with function `tbl_df()`
+* Tibbles only print enough data to fit onto your *RStudio* console
+* Unlike standard data frames, tibbles provide data dimensions, variable names, and variable classes
+* There is little difference in how data frames and tibbles function, only new features
+
+**A Data Frame:**
+
+```{r}
+as.data.frame(mtcars)
+```
+
+**A Tibble:**
+
+```{r}
+tbl_df(mtcars)
+```
+
+<br>
+
+## Passing the Pipe
+
+**Piping:** The process of passing output from one function as input to another function.
+
+* To do this, we use the **"Pipe Operator"**, or `%>%`, to chain functions
+* Piping always passes a data frame from left to right
+* Piped data can move leftward only for assignment (`<-`)
+
+For example, we can pipe multiple `filter()` operations from package "dplyr":
+
+```{r}
+mtcars %>%
+  filter(mpg > 23) %>%
+  filter(cyl < 6) %>%
+  filter(hp < 90 )
+```
+
+**Note:** Once you've called the name of the data frame (here, `mtcars`), you don't need to call it again!
+
+<br>
+
+# Essential "dplyr" Verbs
+
+**Fundamental Verbs:** The following are the most critical `dplyr` functions.
+
+<br>
+
+## Select (Columns)
+
+Function `select()` is used for dimension reduction, or eliminating unwanted variables.
+
+* Simply input or pipe a data frame or tibble to `select()`
+* List all variable names to preserve, no quotes needed!
+* Include variables in a sequence using `:`, e.g. `mpg:wt`
+* Exclude variables by putting `-` before their names, e.g. `-drat`
+
+```{r}
+head(mtcars)
+mtcars %>% 
+  select(mpg, cyl, hp, wt, am)     # Calling data frame first, then piping
+select(.data = mtcars, mpg, cyl, hp, wt, am)     # Using select() without piping
+mtcars %>%
+  select(mpg:wt, -disp, -drat)     # From "mpg" to "wt", excluding "drat" and "disp"
+```
+
+**Helper Functions for Select:** Package "dplyr" verbs have "helper functions", e.g.
+
+* Functions `starts_with()` and `ends_with()` help select well-labeled variables
+* Functions `contains()` and `matches()` help select variables containing patterns
+
+<br>
+
+## Filter (Rows)
+
+Function `filter()` is used to preserve only rows that meet specified criteria.
+
+* Use comparators like `<`, `>`, `<=`, `>=`, `==`, and `!=`
+* Use multiple comparator statements in a single call to `filter()`
+
+```{r}
+mtcars %>% 
+  filter(mpg > 23)     # Calling data frame first, then piping
+filter(mtcars, wt < 2.1)     # Using select() without piping
+filter(mtcars, 
+       mpg > 23, 
+       wt < 2.1)     # Filter on multiple conditions
+```
+
+<br>
+
+## Mutate
+
+Function `mutate()` easily creates new variables from pre-existing ones.
+
+* Like variables from the data frame, new variable names don't need quotes
+* The new name of the variable is leftward, the formula is rightward
+* Separate the new name and variable formula with `=`
+* Multiple mutations may occur in a single `mutate()` call
+
+**Example:** Converting `mtcars` weight units (`wt`) from 1,000 lbs. to 1 lb.
+
+```{r}
+mtcars %>%
+  select(-disp:-drat, 
+         -qsec:-am) %>%              # Reducing variables with select()
+  mutate(wt_lbs = wt * 1000) %>%     # Mutating variable "wt": "wt_lbs"
+  as_tibble()                        # Coercing to tibble
+```
+
+<br>
+
+## Arrange
+
+Function `arrange()` reorders entire rows based on values for one or more specified variables.
+
+* Specified variables need no `""` or `$`
+* The first variable specified is the one to be rearranged
+* The second variable specified is the values by which to arrange
+* One variable may be arranged per multiple variables and values
+* Use function `desc()` for descending order
+
+**Example:** Arranging `mtcars` by mileage, `mpg`, then mileage (`mpg`) and cylinders (`cyl`).
+
+```{r}
+my_cars <- mtcars %>% 
+  select(mpg:wt, -disp, -drat) %>%
+  filter(wt < 3.2)
+
+my_cars %>% arrange(mpg)          # Arrange by "mpg"
+my_cars %>% arrange(cyl, mpg)     # Arrange by "cyl", then "mpg"
+```
+
+<br>
+
+## Mid-Tutorial Practice
+
+**Instructions:** Run the following code to download the [2018 Hancock Airport renovation data](https://github.com/jamisoncrawford/hancock).
+
+```{r message=FALSE, warning=FALSE}
+if(!require(readr)){install.packages("readr")}
+library(readr)
+
+url <- "https://tinyurl.com/y85g52dg"
+hancock <- read_csv(url)
+```
+
+<br>
+
+**Explore Your Data****:** Run the following code to explore your data.
+
+```{r eval=FALSE}
+class(hancock)
+dim(hancock)
+colnames(hancock)
+glimpse(hancock)
+summary(hancock)
+```
+
+<br>
+
+**Challenges:** Complete the challenges using only "dplyr" verbs. 
+
+* Connect all "dplyr" verbs with the pipe operator, `%>%`.
+
+1. **Filter:** Only some companies in variable `name` have race and gender data. 
+
+    - Use `filter()` to preserve the following companies:
+
+        - Longhouse Construction
+        - Patricia Electric
+        - Quality Structures
+        - Schalk & Son
+        - Stone Bridge Iron & Steel
+ 
+    - Store your updated data frame in an object using assignment, `<-`
+    - It may be helpful which companies to exclude, viz.:
+    
+        - John W. Danforth Company
+        - Environmental Services
+        - Niagara Erecting
+    
+2. **Select:** We can reduce some unwanted or unnecessary dimensions, like detailed location data.
+
+    - Use `select()` to preserve the following variables
+    
+        - `name`
+        - `title`
+        - `sex`
+        - `race`
+        - `net`
+        - `county`
+        - `state`
+        
+    - Again, store your data using assignment, `<-`
+    
+3. **Arrange:** We can gain better insight by sorting the our data.
+
+    - Use `arrange()` to sort by:
+    
+        - Company name, or variable `name`
+        - Ethnicity, or variable `race`
+        - Worker county, or variable `county`
+        - Net pay for period, or variable `net`
+        
+    - Again, store your data using assignment, `<-`
+
+4. **Simplify:** Print your resulting data frame as a tibble using `as_tibble()`; resave.
+ 
+ 
+5. **Chain:** Beginning with `hancock`, chain all above steps into a single command!
+
+    - Use the **pipe operator**, `%>%`, to chain together operations
+    - Remember that you only need to call the name of the data frame *once*
+    - What goes into and comes out of a "dplyr verb" must be a data frame or tibble
+    
+<br>
+
+## Grouping
+
+Function `group_by()` will group observations, by one or more specified variables, *for further manipulation*.
+
+* Functions "piped" (`%>%`) after `group_by()` will transform each group individually
+* All variables are treated categorically whether of class `character` or `factor`
+* Refrain from attempting to group by `numeric` or other continuous data
+* Specified variables need no `""`, `$`, or `=`
+
+**Importing New Data****:** Grouping Hancock Airport and Lakeview Amphitheater renovations [worker records]("https://github.com/jamisoncrawford/reis/blob/master/Datasets/lakeview_hancock_merge.csv") for summary.
+
+```{r cache=TRUE, message=FALSE, warning=FALSE}
+
+library(readr)
+library(dplyr)
+
+url <- "https://tinyurl.com/y9vla57e"      # Assign URLs for cleaner code
+
+workers <- read_csv(url) %>%               # Read in URL data, pipe forward
+  mutate(zip = as.character(zip)) %>%      # Coerce "zip" to class character
+  select(project:race)                     # Reduce variables, assign to "workers"
+
+```
+
+**Grouping by Project****:** Use piping (`%>%`) to chain `group_by()`.
+
+```{r, eval=FALSE}
+
+workers %>%
+  filter(!is.na(project)) %>%        # Remove rows missing values for "project"
+  group_by(project)                  # Group by "project"
+  
+```
+
+**Grouping by Project & Race****:** Use piping (`%>%`) to chain `group_by()`.
+
+```{r, eval=FALSE}
+
+workers %>%
+  filter(!is.na(project),
+         !is.na(race)) %>%        # Remove rows missing values for "project"
+  group_by(project, race)         # Group by "project" and "race"
+  
+```
+
+**Takeaway****:** Function `group_by()` is part bridging function, part partitioning function.
+
+* On it's own, *it doesn't do anything, it is a means to an end*
+* Functions piped after `group_by()` will then act independently on each group 
+* Function `summarize()` was built to inherit `group_by()` output
+* Limited application for non-statistical functions
+
+<br>
+
+## Summarizing
+
+Function `summarize()` creates custom summaries using summarizing functions as arguments.
+
+* The formula for creating a summary variable is: `variable = transformation`
+    - The leftward `variable` may take any alphanumeric name
+    - The rightward `transformation` takes any expression, functions, etc.
+
+**Example****:** Call `summarize()` for the `median()` and `mean()` of variable `gross`.
+
+```{r}
+
+workers %>%
+  filter(!is.na(gross)) %>%                   # Filter rows missing "gross" (optional)
+  summarize(median_gross = median(gross),     # Call median() on gross; name "median_gross"
+            mean_gross = mean(gross))         # Call mean() on gross; name "mean_gross"
+
+```
+
+**Spaces, Numbers in Variable Names****:** Use backticks, `` `` ``, to allow spaces, numbers, etc. in variable names:
+
+```{r}
+
+workers %>%
+  filter(!is.na(gross)) %>%                     # Filter rows missing "gross" (optional)
+  summarize(`Median Gross` = median(gross),     # Name `Median Gross`
+            `Mean Gross` = mean(gross))         # Name `Mean Gross`
+
+```
+
+<br>
+
+# Group-Summarize Operations
+
+**A Powerful Combination****:** So powerful, it warranted it's own section.
+
+* "Group-" or "Group By-Summarize" operations are powerful analytical techniques
+* Pipe `group_by()` and specified grouping variables to `summarize()`
+* Perform statistical operations on grouped observations *independently*
+* Summarized output *does not preserve the rest of your data*
+
+**Median Gross by Race****:** We'll combine `group_by()`, `summarize()`, and `median()`.
+
+```{r}
+
+workers %>%
+  filter(!is.na(race),
+         !is.na(gross)) %>%                         # Filter missing "race", "gross"
+  group_by(race) %>%                                # Group by "race"
+  summarize(med_gross = median(gross)) %>%          # Summarize with median() on "gross"
+  arrange(desc(med_gross))                          # Arrange by descending order
+
+```
+
+**Median Gross by Company, Race****:** We'll apply the same techniques as above, adding `name`.
+
+```{r}
+
+workers %>%
+  filter(!is.na(race),
+         !is.na(gross)) %>%                         # Filter missing "race", "gross"
+  group_by(name, race) %>%                          # Group by "race"
+  summarize(med_gross = median(gross)) %>%          # Summarize with median() on "gross"
+  arrange(name, race)                               # Arrange company, race, gross
+
+```
+
+**Note****:** The more variables input in `group_by()`, the more sophisticated the output.
+
+<br>
+
+## Practice: Grouping & Summarizing
+
+**Instructions****:** Finish the following pipeline to get:
+
+* The `mean()` of variable `gross`
+* Group by variables `project` and `sex`
+
+```{r eval=FALSE}
+
+workers %>%
+  filter(!is.na(sex),
+         !is.na(gross)) %>% 
+  group_by()
+
+```
+
+**Question****:** Which is higher? The mean `gross` payment for males at `project` "Hancock" or "Lakeview"?
+
+<br>
+
+# Join Functions
+
+**A Family of Functions****:** Several "join", or merging, functions exist in `dplyr`.
+
+* "Join" functions always end in `*_join()`, e.g. `inner_join()`
+* Each "join" function either *mutates* or *filters* merged data
+    - **Mutating Joins** add one or more columns to the primary table
+    - **Filtering Joins** return data that are filtered, not modified
+* The base R equivalent of `*_join()` functions is `merge()`
+* Function `left_join()` is the workhorse "join" function
+* See further information on [Stat 545](https://stat545.com/bit001_dplyr-cheatsheet.html) and [RStudio](https://ugoproto.github.io/ugo_r_doc/dplyr.pdf)
+
+**Loading Location Data****:** Use variable `zip` to find additional location data.
+
+```{r, message=FALSE, warning=FALSE}
+if(!require(zipcode)){install.packages("zipcode")}
+library(zipcode)
+
+data(zipcode)
+```
+
+**Joining Location Data****:** Once loaded, we can use `left_join()` on variable `zip`.
+
+```{r}
+locations <- left_join(workers,                          # Indicate data to be joined
+                       zipcode,                          # Indicate data to join
+                       by = "zip") %>%                   # Indicate "key" variable
+  select(project:ending, ssn, gross, city:longitude)     # Reduce variables
+```
+
+<br>
+
+## Practice: Joining Data
+
+**Join More Location Data****:** Use the new `city` and `state` data to add FIPS codes.
+
+```{r, message=FALSE, warning=FALSE}
+if(!require(noncensus)){install.packages("noncensus")}
+library(noncensus)
+
+data(zip_codes)
+```
+
+**Instructions****:** Use function `left_join()` to merge `locations` and `zip_codes`.
+
+* Remember to use `by =` to specify the variable(s) by which to join
+
+```{r eval=FALSE}
+
+locations %>%
+  left_join()
+
+```
+
+<br>
+
+# Tidy Data
+
+**Tidy Data** are data that are arranged to conform to 3 core principles:
+
+* Every observation has a row
+* Every variable has a column
+* Every table contains relevant, appropriate variables
+
+You can read more about "Tidy Data" in Hadley Wickham's 2012 treatise, ["Tidy Data"](https://vita.had.co.nz/papers/tidy-data.pdf).
+
+**Tidyverse Packages** will often operate optimally or exclusively using "Tidy Data" format.
+
+<br>
+
+## Example: Untidy Data
+
+Suppose we track the weights (lbs.) of three pets over three weeks. This is known as **wide format**.
+
+```{r echo=FALSE}
+pets <- data_frame(owner = c("Amit", "Sophia", "Greyson"), 
+                   pet = c("Marshmallow", "Pebbles", "Gary Laser-Eyes"),
+                   week_1 = c(56.2, 14.4, 38.1),
+                   week_2 = c(56.7, 14.3, 41.1),
+                   week_3 = c(56.6, 14.9, 49.3))
+
+kable(pets) %>%
+  kable_styling(bootstrap_options = "striped", 
+                font_size = 14, 
+                full_width = FALSE, 
+                position = "left")
+```
+
+**Question****:** Can you see why these data are "untidy"?
+
+* "Week" is one variable, but here it has multiple columns
+* By converting these data to **long format**, we **tidy** them
+
+<br>
+
+## Example: Tidy Data
+
+Suppose we **tidy** the above data. This is known as **long format**.
+
+```{r echo=FALSE}
+pets_tidy <- data_frame(owner = rep(c("Amit", "Sophia", "Greyson"), times = 3), 
+                        pet = rep(c("Marshmallow", "Pebbles", "Gary Laser-Eyes"), times = 3),
+                        week = rep(c(1, 2, 3), times = 3),
+                        weight = c(56.2, 14.4, 38.1, 56.7, 14.3, 41.1, 56.6, 14.9, 49.3))
+
+kable(pets_tidy) %>%
+  kable_styling(bootstrap_options = "striped", font_size = 14, full_width = FALSE, position = "left")
+```
+
+**Question****:** Why are the data now "tidy"?
+
+* Note how the dataset becomes longer as values now repeat more often
+* Hence, **tidy data** are often **long**
+
+<br>
+
+## Package "tidyr"
+
+Package `tidyr` is meant for one purpose: tidying data.
+
+* Two very important functions: `spread()` and `gather()`
+* These functions are more than transposing data, they tidy them
+
+```{r, message=FALSE, warning=FALSE}
+if(!require(tidyr)){install.packages("tidyr")}
+library(tidyr)
+```
+
+<br>
+
+## Spreading Data
+
+Function `spread()` creates multiple new columns from key-pair data.
+
+```{r}
+subset <- workers %>%
+  select(project:race) %>%
+  filter(!is.na(ending))
+
+head(subset)
+
+wrong <- subset %>% 
+  spread(key = ending,        # Unique values in `ending` become columns
+         value = hours)       # Variable `hours` is redistributed
+
+wrong[, 40:44]                # View 4 of 46 new columns added
+```
+
+**Takeaway****:** I generally avoid `spread()` but it has its uses.
+
+* We often recieve data that are "untidy", "spread", or "wide"
+* This format has it's uses for certain functions in R and other tooling
+
+<br>
+
+## Gathering (Tidying) Data
+
+Function `gather()` tidies "wide" datasets.
+
+**Create an Untidy Data Frame****:** Recreate the previous example and assign to `pets`.
+
+```{r}
+pets <- data_frame(owner = c("Amit", "Sophia", "Greyson"), 
+                   pet = c("Marshmallow", "Pebbles", "Gary Laser-Eyes"),
+                   week_1 = c(56.2, 14.4, 38.1),
+                   week_2 = c(56.7, 14.3, 41.1),
+                   week_3 = c(56.6, 14.9, 49.3))
+
+print(pets)
+```
+
+**Tidy that Data Frame****:** Use `gather()` and the notation as guidance.
+
+```{r}
+pets %>%                      # Pipe "pets" into spread()
+  gather(key = week,          # Name the variable that takes gathered column names
+         value = weight,      # Name the variable that takes gathered values
+         week_1:week_3)       # Name the columns to gather
+```
+
+<br>
+
+# SQL with "dplyr"
+
+**SQL**, or **Structured Query Language** (often pronounced "sequel"), is a specialized language and is:
+
+* "SQL is over 40 years old, and is used by pretty much every database in existence." (["dplyr" vignette](https://db.rstudio.com/dplyr/))
+* Used mainly for **relational databases**, collections of datasets that are related by unique IDs
+* One of the most important languages in data analytics, given the prevalence of databases
+* Practically *domain-specific*, i.e. used almost exclusively for a single purpose
+
+<br>
+
+## Relational Databases
+
+All **relational databases** are made up of separate tables that connect each other by using unique IDs.
+
+Observe the following tables:
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(dplyr)
+
+name_table <- data_frame("Name" = c("Harshita", "Alex", "Fred", "Shannon", "Jamison", "Luis", "Kennedy"),
+                         "ID" = c("001", "002", "003", "004", "005", "006", "007"))
+
+cage_table <- data_frame("ID" = c("001", "002", "003", "004", "005", "006", "007"),
+                        "Cage Rating" = c(7, 6, 7, 1, 2, 7, 4))
+
+exam_table <- data_frame("ID" = c("001", "002", "003", "004", "005", "006", "007"),
+                         "Score" = c(96, 99, 97, NA, 41, 75, 79))
+```
+
+**Table A: Names & IDs**
+
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+library(kableExtra)
+
+kable(name_table) %>%
+  kable_styling(bootstrap_options = "striped", 
+                font_size = 14, 
+                full_width = FALSE, 
+                position = "left")
+```
+
+**Table B: Likert Scale Responses on Nicholas Cage**
+
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+library(kableExtra)
+
+kable(cage_table) %>%
+  kable_styling(bootstrap_options = "striped", 
+                font_size = 14, 
+                full_width = FALSE, 
+                position = "left")
+```
+
+**Table C: Civil Service Exam Scores**
+
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+library(kableExtra)
+
+kable(exam_table) %>%
+  kable_styling(bootstrap_options = "striped", 
+                font_size = 14, 
+                full_width = FALSE, 
+                position = "left")
+```
+
+These tables demonstrate how relational databases function.
+
+In *Table A*, or `Cage Table`, Likert responses range from one to seven:
+
+* "7" indicates "strongly agree"
+* "1" indicates "stongly disagree"
+* Statement: "Nicholas Cage is the only actor to evolve the craft since Marlon Brando".
+
+However, we cannot yet determine the most vehement Cage fans, since `Cage Table` only contains ID numbers, not names.
+
+Hence, we must find a related table to better make sense of these data - specifically *Table A*.
+
+```{r}
+merged_tables <- left_join(name_table,
+                           cage_table, 
+                           by = "ID")     # Use one of dplyr's *_join() functions
+print(merged_tables)
+```
+
+Now that these tables are merged, we can determine who exactly recognized Nicholas Cage's genius.
+
+<br>
+
+## Relating More than One Table
+
+One need not stop at simply identifying Cage advocates by name. By relating additonal databases, we may:
+
+* Reveal additional information about observations or instances
+* Study the relationships between variables regardless of the individuals that connect the data
+
+Here, we merge *Table C* with the already merged *Table A* and *Table B* to create `master_table`.
+
+```{r message=FALSE, warning=FALSE}
+
+master_table <- left_join(merged_tables,
+                          exam_table, 
+                          by = "ID")
+
+print(master_table)
+```
+
+In sum, these databases are only relatable through the use of unique IDs.
+
+Ignoring the "who", we can study the relationship between variables. The following attempts to model civil service exam scores in relation to appreciation for Nicholas Cage's art.
+
+```{r warning=FALSE, message=FALSE}
+
+head(master_table)
+
+model <- lm(master_table$Score ~ master_table$`Cage Rating`)
+
+print(model)
+
+```
+
+Fascinating! There seems to be no significant relationship between utter devotion to Nicholas Cage and exam scores. Still, [be careful out there](http://tylervigen.com/view_correlation?id=359).
+
+<br>
+
+## SQL with "dplyr" Functions
+
+Interestingly, many functions we've seen in "dplyr" are the same functions in SQL:
+
+* `SELECT` is similar to `select()`
+* `INNER JOIN` and `OUTER JOIN`, are similar to `inner_join()` and `outer_join()`
+* `GROUP BY` is simialr to `group_by()`
+
+However, we do not need to learn SQL (though it is recommended) to use it. Instead we may use standard "dplyr" functions that:
+
+* Allow connecting and disconneting to databases
+* Read in only the values queried, allowing work with data too big for a single machine, even with parallel processing
+* Convert "dplyr" code into SQL or other native database languages
+
+<br>
+
+## Connecting to Databases
+
+The first step to querying data is to connect to a database. Consider the following:
+
+* Using SQL via "dplyr" requires additional packages, e.g. "dbplyr" and "RMySQL"
+* SQL comes in different flavors, so using the right function is critical
+    - `src_sqlite()` for *SQLite*
+    - `src_mysql()` for *MySQL* and *MariaDB*
+    - `src_postgres()` for *PostgreSQL*
+* Learn more about SQL and "dplyr" by typing the expression: `vignette("databases", packages = "dplyr")`
+
+First, we must install and load the "DBI" package, which helps R translate different languages like SQL. 
+
+```{r warning=FALSE, message=FALSE, echo=TRUE}
+
+if(!require(dbplyr)){install.packages("dbplyr")}     # Package "DBI" installed with "dbplyr"
+if(!require(RMySQL)){install.packages("RMySQL")}
+if(!require(RSQLite)){install.packages("RSQLite")}
+
+library(dbplyr)
+library(RMySQL)
+library(RSQLite)
+
+```
+
+The following uses a free practice SQL database, courtesy of [RStudio](https://db.rstudio.com/dplyr/).
+
+To learn more about these arguments, view package documentation with the expression: `?dbplyr`, or visit the package ["dbplyr" vignette](https://dbplyr.tidyverse.org/articles/dbplyr.html), which provides the following examples.
+
+In lieu of accessing a live SQL database, we may use `dbConnect()` to connect to our machine's internal memory.
+
+```{r eval=FALSE}
+
+library(dplyr)
+
+con <- DBI::dbConnect(RMySQL::RMySQL(), dbname = ":memory:")
+
+```
+
+<br>
+
+## Storing in Databases
+
+Connecting the local memory to simulate a practice database, we may store `nycflights13` using function `copy_to()`.
+
+```{r warning=FALSE, eval=FALSE}
+
+if(!require(nycflights13)){install.packages("nycflights13")}
+library(nycflights13)
+
+copy_to(con, nycflights13::flights, "flights",    # The vignette author emphasizes starting with the right indexing.
+  temporary = FALSE, 
+  indexes = list(
+    c("year", "month", "day"), 
+    "carrier", 
+    "tailnum",
+    "dest"
+  )
+)
+
+```
+
+<br>
+
+## Referencing Databases
+
+The database has no name, though. To reference it, use function `tbl()` and assignment, or `<-`.
+
+```{r warning=FALSE, eval=FALSE}
+
+flights_db <- tbl(con, "flights")
+
+```
+
+<br>
+
+## Querying Databases
+
+Now that you can reference `flights_db` by name, you can extract data from it like any other object in the environment. 
+
+```{r warning=FALSE, eval=FALSE}
+
+names(flights_db)
+class(flights_db)
+
+print(flights_db)
+
+```
+
+Note that "dplyr" functions that have equivalent functions in SQL are far more likely to operate as expected.
+
+However, "dbplyr" is optimized for `select()`, one of the most common tasks for analysts in generating SQL queries. 
+
+```{r eval=FALSE}
+
+flights_db %>%
+  select(year, month, day, carrier, air_time) %>%
+  group_by(carrier) %>%
+  summarize(total_at = sum(air_time))
+
+```
+
+<br>
+
+## Don't Neglect, Disconnect!
+
+When you've finished with your queries, don't forget to disconnect. As a courtesy, don't hog others' bandwidth.
+
+```{r eval=FALSE}
+dbDisconnect(conn = con)
+```
+
+<br>
+
+# Applied Practice
+
+**Preparation****:** Resimulate the `nycflights13` data if you disconnected during the previous section:
+
+```{r eval=FALSE}
+con <- DBI::dbConnect(RMySQL::RMySQL(), dbname = ":memory:")
+```
+
+```{r eval=FALSE}
+
+if(!require(dplyr)){install.packages("dplyr")}
+if(!require(nycflights13)){install.packages("nycflights13")}
+
+library(dplyr)
+library(nycflights13)
+
+con <- DBI::dbConnect(RMySQL::RMySQL(), dbname = ":memory:")
+
+copy_to(con, nycflights13::flights, "flights",    # The vignette author emphasizes starting with the right indexing.
+  temporary = FALSE, 
+  indexes = list(
+    c("year", "month", "day"), 
+    "carrier", 
+    "tailnum",
+    "dest"
+  )
+)
+
+flights_db <- tbl(con, "flights")
+
+```
+
+<br>
+
+**Instructions****:** Use "dplyr" functions with object `flights_db` to determine the following summary statistics.
+
+1. What are the mean departure delays, or `dep_delay`, when grouping by `carrier`.
+2. What is the maximum `distance` among trips when grouping by `month`?
+3. What is the mean and median `dep_delay` and `arr_delay` when grouping by `month`?
+4. **Bonus****:** What should you do once you've finished generating queries in a connected a database?

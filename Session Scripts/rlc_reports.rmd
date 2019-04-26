@@ -1,0 +1,59 @@
+---
+title: 'Visualization in R'
+author: "Jamison R. Crawford, MPA"
+date: "March 13, 2019"
+output:
+  html_document:
+    number_sections: yes
+    toc: yes
+    toc_depth: 4
+    toc_float: yes
+  pdf_document:
+    toc: yes
+    toc_depth: '4'
+---
+
+```{r packages, echo=FALSE, message=FALSE, warning=FALSE, cache=TRUE}
+
+options(scipen = 999)
+
+if(!require(zoo)){install.packages("zoo")}
+if(!require(tidyr)){install.packages("tidyr")}
+if(!require(readr)){install.packages("readr")}
+if(!require(dplyr)){install.packages("dplyr")}
+if(!require(GGally)){install.packages("GGally")}
+if(!require(scales)){install.packages("scales")}
+if(!require(stringr)){install.packages("stringr")}
+if(!require(ggplot2)){install.packages("ggplot2")}
+if(!require(kableExtra)){install.packages("kableExtra")}
+
+library(zoo)
+library(tidyr)
+library(readr)
+library(dplyr)
+library(GGally)
+library(scales)
+library(stringr)
+library(ggplot2)
+library(kableExtra)
+
+rm(list = ls())
+
+```
+
+<br>
+
+# Data Visualization Tools in R
+
+Data visualization is:
+
+* "The representation of an object, situation, or set of information as a chart or other image", per [Oxford Living Dictionaries](https://en.oxforddictionaries.com/definition/us/data_visualization)
+* "...the creation and study of the visual representation of data", per [Wikipedia](https://en.wikipedia.org/wiki/Data_visualization)
+
+##
+
+![*Scripts document every step in your data analytic pipeline. Styling, annotation, and formatting are critical.*](img_script_example.jpg)
+
+</center>
+
+<br>

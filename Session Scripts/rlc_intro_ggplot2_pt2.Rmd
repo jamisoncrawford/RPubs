@@ -1,0 +1,469 @@
+---
+title: 'Visualization with ggplot2: Part II'
+author: "Jamison R. Crawford, MPA"
+date: "April 26, 2019"
+output:
+  html_document:
+    number_sections: yes
+    toc: yes
+    toc_depth: 4
+    toc_float: yes
+  pdf_document:
+    toc: yes
+    toc_depth: '4'
+---
+
+<style>
+body {
+text-align: justify}
+</style>
+
+<br>
+
+# Review
+
+**Base R Visualization.** For an introduction to data visualization in R, see [Visualization in Base R](http://rpubs.com/JamisonCrawford/graphics).
+
+**Introduction to ggplot2.** To view the first part of this series on visualization in `ggplot2`, see [Visualization with ggplot2: Part I](http://rpubs.com/jamisoncrawford/ggplot2).
+
+<br>
+
+## Installing & Loading
+
+**Installing Packages.** Packages, or libraries, extend R's functionality.
+
+  * Install packages with function `install.packages()` and the package name in quotes `""`
+  * If you already have `ggplot2` installed, you do not need to reinstall it, just load it
+  * The following command will install package `ggplot2`
+  
+<br>
+    
+```{r message=FALSE, warning=FALSE, eval=FALSE}
+install.packages("ggplot2")
+```
+
+<br>
+
+**Additional Packages.** Because we'll focus on graphical themes in this session:
+
+  * We'll also install package `ggthemes` and `GGally` to enhance the `ggplot2` package
+  * Like `ggplot2`, skip this if `ggthemes` is already installed
+  * Package `ggthemes` adds a number of new premade themes to `ggplot2`
+  * Explore dozens of new themes at [All Your Figure Are Belong to Us](https://yutannihilation.github.io/allYourFigureAreBelongToUs/ggthemes/)
+  * Remember that R is *case-sensitive*
+  
+<br>
+    
+```{r message=FALSE, warning=FALSE, eval=FALSE}
+install.packages("ggthemes")
+install.packages("GGally")
+```
+
+<br>
+
+**Loading Packages.** Once installed, packages must be loaded into your session:
+
+  * You can load packages individually using function `library()`
+  * This time, quotes (`""`) are optional for package names
+  * Remember that R is *case-sensitive*
+  
+<br>
+
+```{r message=FALSE, warning=FALSE, eval=TRUE, cache=TRUE}
+library(ggplot2)
+library(ggthemes)
+library(GGally)
+```
+
+<br>
+
+## The Grammar of Graphics
+
+**Visualization Shorthand.** Like human language and parts of speech, e.g. verbs, nouns, adjectives, etc.: 
+
+  * Data visualization is also comprised of "parts" called **layers**
+  * See Leland Wilkinson's work [The Grammar of Graphics](https://books.google.com/books/about/The_Grammar_of_Graphics.html?id=NRyGnjeNKJIC&printsec=frontcover&source=kp_read_button#v=onepage&q&f=false) (1999)
+  * "Grammar of Graphics" is the `gg` in `ggplot2`
+  * `ggplot2` was designed by Hadley Wickham using this framework
+  * See Wickham's [A Layered Grammar of Graphics](https://vita.had.co.nz/papers/layered-grammar.html) (2010)
+  
+<br>
+  
+**Layers.** "Layers" are the equivalent of parts of speech in human language; there are 7 in total:
+
+  * **Data.** Your dataset and variables of interest (`ggplot()`)
+  * **Aesthetics.** How you map variables, e.g. x- and y-axis, color, size, etc. (`aes()`)
+  * **Geometries.** The shape of your visualization, e.g. scatter plots, bar plots, etc. (`geom_*()`)
+  * **Facets.** Grouping variables and displaying each over many visualizations (`facet_*()`)
+  * **Statistics.** Statistical elements, such as bins and linear regression (`stat_*()`)
+  * **Coordinates.** Zooming in or changing height and width (`coord_*()`)
+  * **Themes.** Stylizing and polishing plots (`theme_*()`)
+  
+<br>
+
+**Essential Layers.** Three **layers** are essential to any `ggplot2` visualization:
+
+  * **Data.** Because you need some data to visualize them
+  * **Aesthetics.** Because you want to show specific variables from your data
+  * **Geometries.** Because your variables must assume a form
+  
+<br>
+
+**Observe.** Here we use the practice dataset `diamonds`, which we call with function `data()`:
+
+  * Note that we connect `ggplot2` functions with the **addition operator**, or `+`
+  * The `diamonds` dataset is built into `ggplot2`
+  * Optional: Load `diamonds` with function `data()`
+  
+<br>
+
+```{r warning=FALSE, message=FALSE, cache=TRUE}
+ggplot(diamonds) +                # Data
+  aes(x = carat, y = price) +     # Aesthetics, here x- and y-axes
+  geom_point()                    # Geometries, here a scatterplot
+```
+  
+<br>
+
+**"Proper" Syntax.** Though the above is easier, function `aes()` *should be* nested in `ggplot()`
+
+```{r warning=FALSE, message=FALSE, cache=TRUE}
+ggplot(diamonds,             # Separate arguments with commas
+       aes(x = carat, 
+           y = price)) +     # Double end parantheses ends both ggplot() and aes()
+  geom_point()
+```
+  
+<br>
+
+## Data vs. Non-Data Ink
+
+**Data Ink.** The **aesthetics layer** is only used to show **data ink**, in function `aes()`
+
+  * "Data Ink" refers to any element of a page that depicts your data
+  * "Data Ink" is dynamic, so when your data changes, your ink changes
+  * Arguments include `x =`, `y =`, `color =`, `fill =`, `size =`, etc.
+  * Also called **aesthetic mappings**
+  
+<br>
+  
+```{r warning=FALSE, message=FALSE, cache=TRUE}
+ggplot(diamonds,
+       aes(x = carat, 
+           y = price,
+           color = clarity)) +     # Argument "color =" shows variable "clarity"
+  geom_point()
+```
+  
+<br>
+
+**Non-Data Ink.** The **geometries layer** also shows **non-data ink** in `geom_*()` functions
+
+  * "Non-data Ink" does not depict data, but makes graphics easier to interpret
+  * "Non-data Ink" is not dynamic, so it stays the same if your data change
+  * Except for `x =` and `y =`, all **data ink** arguments are the same
+  * Also called **attributes**
+  
+<br>
+  
+```{r warning=FALSE, message=FALSE, cache=TRUE}
+ggplot(diamonds,
+       aes(x = carat, 
+           y = price)) +
+  geom_point(alpha = 0.075,        # Argument "alpha =" makes data transparent (7.5%)
+             color = "tomato")     # Argument "color =" makes your data pop
+```
+
+<br>
+
+**Conclusion.** Combine both **data** and **non-data ink** for optimal effect.
+
+<br>
+
+```{r warning=FALSE, message=FALSE, cache=TRUE}
+ggplot(diamonds,
+       aes(x = carat, 
+           y = price,
+           color = clarity)) +
+  geom_point(alpha = 0.35)        # Argument "alpha =" makes data transparent (7.5%)
+```
+
+<br>
+
+# Geometries
+
+There are 60+ geometry functions in package `ggplot2`. They all begin with `geom_`.
+
+  * To browse geometries, simply type `geom_` in the RStudio **console**
+  * Alternatively, you can view the [official ggplot2 documentation](https://ggplot2.tidyverse.org/reference/)
+  * Alternatively, you can view the [official ggplot2 cheat sheet](https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf) 
+
+<br>
+
+## Proper Form
+
+**What's Good?** Over time, which **geometries** to use becomes intuitive.
+
+  * Selecting the right **geometry** begins with one question: "What's the big idea?"
+  * If visualizing for a colleague or collaborator, always *consult for context*
+    - "I want to show revenue over time" indicates a **line chart**
+    - "I want to show the difference in income by ethnicity" indicates a **bar chart**
+    - "I want to that most of our clients are young folks" indicates a **histogram**
+    - "I want to show a pie chart with all 23 flavors in Dr. Pepper" indicates **inexperience**
+  * If you need help, consider visiting "Input" in [Data Viz Project](https://datavizproject.com/)
+
+<br>
+
+**Scatter Plots** measure two continuous (numeric) variables, like length and width:
+
+  * Use function `geom_point()` for a typical scatter plot
+  * If many overlapping points, add random noise with `geom_jitter()`
+
+<br>
+
+```{r warning=FALSE, message=FALSE, cache=TRUE}
+data(iris)
+ggplot(iris, 
+       aes(x = Petal.Length,       # Length in centimeters
+           y = Petal.Width,        # Width in centimeters
+           color = Species)) +
+  geom_point()
+
+ggplot(iris, 
+       aes(x = Petal.Length,       # Length in centimeters
+           y = Petal.Width,        # Width in centimeters
+           color = Species)) +
+  geom_jitter()
+```
+
+<br>
+
+**Bar Plots** measure one continuous (numeric) and one categorical variable:
+
+  * Note that `geom_bar()` needs argument `stat =` to tell R how to plot your geometry
+  * Calling `options(scipen = 999)` disables scientific notation (orders of magnitude)
+
+<br>
+
+```{r warning=FALSE, message=FALSE, cache=TRUE}
+options(scipen = 999)             # Disable scientific notation
+```
+
+<br>
+
+```{r warning=FALSE, message=FALSE, cache=TRUE}
+ggplot(diamonds, 
+       aes(x = cut,               # Categorical (Quality of Cut)
+           y = price)) +          # Continuous (US Dollars)
+  geom_bar(stat = "identity",     # Argument "stat =" tells R how to handle stats
+           color = "skyblue")     
+```
+
+<br>
+
+**Histograms** visualize distributions of a single continuous variable, like `mpg`:
+
+  * Function `geom_histogram()` automatically chooses **bin widths**
+  * **Histograms** show total amount of observations in each range of values
+  * **Bin widths** control how big or small each value range is
+  * Note that `fill =` is needed for areas and `color =` is for lines and points 
+
+<br>
+
+```{r warning=FALSE, message=FALSE, cache=TRUE}
+data(diamonds)
+ggplot(diamonds,
+       aes(x = carat)) +
+  geom_histogram(fill = "dodgerblue3")     # Argument "fill =" needed for areas
+```
+
+<br>
+
+**Line Graphs** generally visualize changes in data over time.
+
+  * There are several types of line graphs in `ggplot2`
+    - `geom_line()` seems obvious, but it makes the line touch the x-axis between values
+    - `geom_step()` is an improvement, making horizontal lines between values
+    - `geom_path()` is often ideal, directly connecting each data point with a line
+  * Practice dataset `economics` already has dates and number of unemployed, *in thousands*
+
+<br>
+
+```{r warning=FALSE, message=FALSE, cache=TRUE}
+data(economics)
+ggplot(economics, 
+       aes(x = date,
+           y = unemploy)) +
+  geom_path()
+```
+
+<br>
+
+**Conclusion.** Choose the right **geometries** for the variables you want to show. 
+
+*Then* make it pretty. But never *too pretty* that it obfuscates the clarity of your ideas.
+
+<br>
+
+> "His clothes were all new and had been cut by a good Moscow tailor. But there was something wrong even with his clothes. They were rather too fashionable, as clothes always are from conscientious but not very talented tailors." 
+
+*Fyodor Dostoevsky, "The Idiot", Part II, Chapter 2*
+
+<br>
+
+```{r warning=FALSE, message=FALSE, cache=TRUE, echo=FALSE}
+library(scales)
+ggplot(economics, 
+       aes(x = date,
+           y = unemploy)) +
+  geom_path() +
+  labs(title = "National unemployment",
+       subtitle = "United States, 1967-2015",
+       caption = "Source: Federal Reserve Bank of St. Louis",
+       x = "Year",
+       y = "Unemployed, in thousands") +
+  scale_y_continuous(labels = comma, 
+                     limits = c(0, 16000)) +
+  theme_minimal()
+```
+
+<br>
+
+## Factor This In
+
+**Factors** in R are the same as **categorical variables**, a.k.a. "nominal", "discrete", etc.
+
+  * This is a source of frustration, since you sometimes must tell R explicitly
+  * Use function `as.factor()` on a variable to tell R that it is **categorical**
+  * **Question.** Why is this an issue?
+  * **Another Question.** How many cylinders are in cars, typically?
+  
+<br>
+  
+```{r warning=FALSE, message=FALSE, cache=TRUE}
+data(mtcars)
+ggplot(mtcars, aes(x = cyl,        # Number of cylinders
+                   y = mpg)) +     # Miles per gallon 
+  geom_point()
+```
+
+<br>
+
+**What the heck?** Where are all the 5- and 7-cylinder cars?
+
+  * Right, the 32 cars in dataset `mtcars` only have 4-, 6-, and 8-cylinder engines
+  * R hasn't been told that variable `cyl` ("cylinders") is *categorical*
+  * Let's try again with function `as.factor()`
+  
+<br>
+
+```{r warning=FALSE, message=FALSE, cache=TRUE}
+data(mtcars)
+ggplot(mtcars, aes(x = as.factor(cyl),     # Cylinders "coerced" (changed) to factor
+                   y = mpg)) +
+  geom_point()
+```
+
+<br>
+
+**Better.** But we can add some random noise by using the **geometry** `geom_jitter()`:
+
+  * Argument `width =` and `height =` controls degree of random noise
+
+<br>
+
+```{r warning=FALSE, message=FALSE, cache=TRUE}
+data(mtcars)
+ggplot(mtcars, aes(x = as.factor(cyl),     # Still a factor
+                   y = mpg)) +
+  geom_jitter(width = 0.05)                # Jittered slightly, but "mpg" still precise
+```
+
+<br>
+
+Right.
+
+<br>
+
+# Preset Themes
+
+Because we're cutting it close on time, let's cover premade themes quickly.
+
+  * The **themes layer** largely concerns style and **non-data ink**
+  * All **themes** functions begin with `theme_`
+  * Function `theme()` allows for total customization
+  * Function `theme_set()` allows for *global themes* and will apply to all plots
+    - More on this at a later time, we just had to cover **geometries**
+  * Simply add your preferred **theme** with the `+` operator
+  * There are dozens of premade **themes**, and dozens more with package `ggthemes`
+    - Type `theme_` in the console and scroll through the autocomplete dropdown
+
+<br>
+
+Try `theme_light()`:
+
+```{r warning=FALSE, message=FALSE, cache=TRUE}
+library(ggthemes)
+ggplot(diamonds,
+       aes(x = cut,
+           y = price)) +
+  geom_jitter(width = 0.25,
+              alpha = 0.05,
+              color = "tomato") +
+  theme_light()                       # Just add the theme layer onto the graph
+```
+
+<br>
+
+Or `theme_fivethirtyeight()`:
+
+```{r warning=FALSE, message=FALSE, cache=TRUE}
+library(ggthemes)
+ggplot(diamonds,
+       aes(x = cut,
+           y = price)) +
+  geom_jitter(width = 0.25,
+              alpha = 0.1,
+              color = "tomato") +
+  theme_fivethirtyeight()
+```
+
+<br>
+
+Or `theme_minimal()`:
+
+```{r warning=FALSE, message=FALSE, cache=TRUE}
+library(ggthemes)
+ggplot(diamonds,
+       aes(x = cut,
+           y = price)) +
+  geom_jitter(width = 0.25,
+              alpha = 0.05,
+              color = "tomato") +
+  theme_classic()
+```
+
+<br>
+
+# Practice: Labeling & Themes
+
+**Instructions.** Take any of the above plots and use the `+` operator to add function `labs()`.
+
+  * In `labs()`, you can set graph labels for the following arguments:
+    - `title =`
+    - `subtitle =`
+    - `caption =`
+    - `x =`
+    - `y =`
+    - Make sure to put your text in quotations!
+  * Select any dataset, between `mtcars`, `diamonds`, `economics`, or `iris`
+  * Use function `names()` with the dataset name inside `()` to get the variable names
+    - Alternatively, use function `help()` with the dataset for definitions
+  * Select data ink for function `aes()`, a geometry, and non-data ink inside `geom_*()`
+    - Alternatively, reuse an existing plot for convenience
+  * Browse and select a theme you like using any `theme_*()` function
+  * Make sure your data and non-data ink convey your finding clearly; polish appropriately
+
+<br>
+
+Thanks, everyone.
